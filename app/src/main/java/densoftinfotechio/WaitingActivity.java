@@ -33,6 +33,7 @@ import densoftinfotechio.videocall.openlive.activities.MainActivity;
 public class WaitingActivity extends AppCompatActivity {
 
     TextView tv_loading, tv_join;
+
     Animation fade_animation;
     private DatabaseReference databaseReference;
     private SharedPreferences preferences;
