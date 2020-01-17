@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main Activity -->
+    <string name="start_broadcast_title">开始直播</string>
+    <string name="topic_edit_hint">输入一个聊天话题</string>
+    <string name="need_necessary_permissions">缺少必要权限</string>
+
+    <!-- Setting Activity -->
+    <string name="setting_title">设置</string>
+    <string name="setting_resolution_title">分辨率</string>
+    <string name="setting_stats_title">显示视频统计数据</string>
+
+    <!-- Role Choose Activity -->
+    <string name="select_role_title">请选择你的身份</string>
+    <string name="select_role_broadcaster">我是主播</string>
+    <string name="select_role_audience">我是观众</string>
+    <string name="select_role_broadcaster_hint">以主播身份进入</string>
+    <string name="select_role_audience_hint">以观众身份进入</string>
+
+    <string-array name="encryption_mode_values">
+        <item>AES-128-XTS</item>
+        <item>AES-256-XTS</item>
+    </string-array>
+
+    <string-array name="string_array_resolutions">
+        <item>160x120</item>
+        // 120P
+        <item>320x180</item>
+        // 180P
+        <item>320x240</item>
+        // 240P the default one
+        <item>640x360</item>
+        // 360P
+        <item>640x480</item>
+        // 480P
+        <item>1280x720</item>
+        // 720P
+    </string-array>
+
+    <string-array name="string_array_frame_rate">
+        <item>15</item>
+        // 120P
+        <item>15</item>
+        // 180P
+        <item>15</item>
+        // 240P
+        <item>15</item>
+        // 360P
+        <item>15</item>
+        // 480P
+        <item>15</item>
+        // 720P
+    </string-array>
+
+    <string-array name="string_array_bit_rate">
+        <item>80</item>
+        // 120P
+        <item>160</item>
+        // 180P
+        <item>200</item>
+        // 240P
+        <item>400</item>
+        // 360P
+        <item>500</item>
+        // 480P
+        <item>1000</item>
+        // 720P
+    </string-array>
+
+    <string name="legal_channel_name_characters">abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&amp;()+,-:;&lt;=.>?@[]^_`{|}~</string>
+
+    <string name="label_settings">Settings</string>
+
+    <string name="msg_welcome_message">Welcome to Open Video Call!</string>
+
+    <string name="label_room_name_hint">Room name</string>
+
+    <string name="msg_choose_role">Would you like to be the broadcaster or an audience?</string>
+
+    <string name="label_audience">Audience</string>
+
+    <string name="label_broadcaster">Broadcaster</string>
+
+
+    <string name="label_channel_name_hint">Channel name</string>
+
+    <string name="label_encryption_key_hint">Encryption key</string>
+
+    <string name="label_join">Join</string>
+
+    <string name="label_confirm">Confirm</string>
+
+    <string name="label_send">Send</string>
+
+    <string name="msg_say_something">Say something…</string>
+
+    <string name="msg_no_network_connection">No network connection, please check the network settings</string>
+
+    <string name="label_title_resolution">Resolution\n(Width * Height)</string>
+    <string name="label_title_frame_rate">Frame Rate\n(fps)</string>
+
+    <string name="receiving_videocall_patientid">You are receiving a Video call from Patient Id </string>
+    <string name="receiving_videocall_doctorid">You are receiving a Video call from Doctor Id </string>
+    <string name="receiving_audiocall_patientid">You are receiving an Audio call from Patient Id </string>
+    <string name="receiving_audiocall_doctorid">You are receiving an Audio call from Doctor Id </string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="label_start_camera">Start sharing your camera</string>
+    <string name="label_stop_camera">Stop sharing your camera</string>
+    <string name="label_start_sharing_your_screen">Start Sharing your screen</string>
+    <string name="label_stop_sharing_your_screen">Stop Sharing your screen</string>
+
+    <string name="label_channel_name">Screen Share</string>
+
+    // DO NOT TRANSLATE
+    <string name="bit_rate_value_with_unit">%d kbps</string>
+</resources>

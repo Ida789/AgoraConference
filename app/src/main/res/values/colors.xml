@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <color name="colorPrimary">#058997</color>
+    <color name="colorPrimaryDark">#046E7A</color>
+    <color name="colorAccent">#046E7A</color>
+
+    <color name="gray_lightest">#DEDEDE</color>
+    <color name="gray_light">#CCCCCC</color>
+    <color name="gray">#989898</color>
+    <color name="gray_dark">#666666</color>
+    <color name="gray_deep_dark">#333333</color>
+
+    <color name="blue">#007AFF</color>
+    <color name="blue_medium">#44A2FC</color>
+    <color name="blue_light">#0ECFFF</color>
+    <color name="blue_alpha">#9CD9FF</color>
+
+    <color name="dark_black">#CC262626</color>
+    <color name="black_half_transparent">#66000000</color>
+    <color name="black_full_transparent">#22000000</color>
+
+    <color name="lightColorAccent">#30FF4081</color>
+    <color name="agora_blue">#FF00A0EB</color>
+
+    <color name="transparent_75_white">#ACFFFFFF</color>
+    <color name="dark_gray">#FF55585A</color>
+    <color name="White">#ffffff</color>
+    <color name="Gray">#9e9e9e</color>
+    <color name="Gray600">#757575</color>
+    <color name="GrayLight3">#E0E0E0</color>
+    <color name="redish_axis">#B4034B</color>
+    <color name="white">#ffffff</color>
+    <color name="Green1">#00852A</color>
+    <color name="yellow">#FEC224</color>
+    <color name="red">#F51716</color>
+    <color name="darkred">#AB0303</color>
+    <color name="gridcolor_2">#05C5CD</color>
+    <color name="black">#000</color>
+    <color name="green">#4ACC60</color>
+    <color name="pink">#6A2290</color>
+    <color name="pink_dark">#4B0082</color>
+
+
+</resources>

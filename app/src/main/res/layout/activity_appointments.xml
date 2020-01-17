@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="densoftinfotechio.AppointmentsActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_doctor_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter doctor id"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/et_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select date"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:layout_marginLeft="20dp"
+            android:focusable="false"/>
+
+        <EditText
+            android:id="@+id/et_patient_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="My id"
+            android:inputType="number"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+
+
+        <TextView
+            android:id="@+id/tv_findslots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Find Available Slots"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:background="@drawable/rounded_bg_blue"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+
+        <EditText
+            android:id="@+id/et_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter day"
+            android:inputType="number"
+            android:maxLength="2"
+            android:text="17"
+            android:textAlignment="center"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/et_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter month"
+            android:inputType="number"
+            android:maxLength="2"
+            android:text="12"
+            android:textAlignment="center"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/et_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter year"
+            android:inputType="number"
+            android:maxLength="4"
+            android:text="2019"
+            android:textAlignment="center"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Morning Slots Available"
+        android:textAlignment="center"
+        android:layout_marginTop="10dp"
+        android:background="@color/darkred"
+        android:textColor="@color/white"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        android:padding="3dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_morningsessions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/Gray600"
+        android:layout_weight="1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Afternoon Slots Available"
+        android:textAlignment="center"
+        android:background="@color/darkred"
+        android:textColor="@color/white"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        android:padding="3dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_afternoonsessions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/Gray600"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Evening Slots Available"
+        android:textAlignment="center"
+        android:background="@color/darkred"
+        android:textColor="@color/white"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        android:padding="3dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_eveningsessions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/Gray600"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_doctor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Doctor"
+            android:gravity="center"
+            android:textColor="@color/gridcolor_2"
+            android:padding="15dp"/>
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="@color/Gray600"/>
+
+
+        <TextView
+            android:id="@+id/tv_patient"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Patient"
+            android:gravity="center"
+            android:textColor="@color/yellow"
+            android:padding="15dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

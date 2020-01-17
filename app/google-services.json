@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "573082821878",
+    "firebase_url": "https://videoconferencedemo.firebaseio.com",
+    "project_id": "videoconferencedemo",
+    "storage_bucket": "videoconferencedemo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:573082821878:android:28d8462bdce4583126f8d7",
+        "android_client_info": {
+          "package_name": "com.densoftida.videoconferencedemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "573082821878-rq3b163c7kn4eklvmhunpehicuoc7bc7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.densoftida.videoconferencedemo",
+            "certificate_hash": "206b989bff895aecf3b17c7f9a891c30a7bac631"
+          }
+        },
+        {
+          "client_id": "573082821878-fnl32a4rt15op7phq6s2vhf986rf16rk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj1tD2KRCouk4JXbUP4oG1UADS_r9F0h4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "573082821878-fnl32a4rt15op7phq6s2vhf986rf16rk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "573082821878-3cnv1anco50uec5scf7k52e0hi917ce5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ida.Conference"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:573082821878:android:6e26331e40bcd25626f8d7",
+        "android_client_info": {
+          "package_name": "densoftinfotechio.agora.openlive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "573082821878-gp98ub4jamd6du5osm930m1pi5e3rumn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "densoftinfotechio.agora.openlive",
+            "certificate_hash": "206b989bff895aecf3b17c7f9a891c30a7bac631"
+          }
+        },
+        {
+          "client_id": "573082821878-fnl32a4rt15op7phq6s2vhf986rf16rk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj1tD2KRCouk4JXbUP4oG1UADS_r9F0h4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "573082821878-fnl32a4rt15op7phq6s2vhf986rf16rk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "573082821878-3cnv1anco50uec5scf7k52e0hi917ce5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ida.Conference"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

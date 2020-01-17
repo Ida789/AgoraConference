@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_margin="3dp"
+    android:padding="4dp"
+    android:background="@drawable/edit_text_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_event_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/tv_event_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/from_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/to_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/tv_startevent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Event"
+            android:background="@drawable/rounded_bg_blue"
+            android:textColor="@color/white"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearlayout_rightsofdcotor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tv_inviteascohost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Invite as Co-Host"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_bg_blue"
+            android:textColor="@color/white"
+            android:padding="3dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/tv_inviteasaudience"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Invite as Audience"
+            android:background="@drawable/rounded_bg_blue"
+            android:textColor="@color/white"
+            android:padding="3dp"
+            android:layout_marginStart="2dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</LinearLayout>

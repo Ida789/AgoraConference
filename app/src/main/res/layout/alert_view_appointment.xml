@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Type of Booking"
+            android:padding="10dp"
+            android:textColor="@color/redish_axis"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+        <TextView
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Close"
+            android:gravity="end"
+            android:padding="10dp"
+            android:textColor="@color/redish_axis"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/Gray"/>
+
+    <RadioGroup
+        android:id="@+id/rg_booking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padd_10">
+
+        <RadioButton
+            android:id="@+id/rb_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:ems="8"/>
+
+        <RadioButton
+            android:id="@+id/rb_audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Audio"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:ems="8"/>
+
+        <RadioButton
+            android:id="@+id/rb_video"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Video"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:ems="8"/>
+
+    </RadioGroup>
+
+
+    <TextView
+        android:id="@+id/tv_book"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Book"
+        android:background="@drawable/rounded_edittext"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_marginBottom="10dp"/>
+
+    <!--<TextView
+        android:id="@+id/tv_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Text"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:background="@color/white"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_marginTop="5dp"
+        android:visibility="gone"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/Gray"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tv_audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Audio"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:background="@color/white"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:visibility="gone"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/Gray"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tv_video"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Video"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:background="@color/white"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:visibility="gone"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/Gray"
+        android:visibility="gone"/>-->
+
+</LinearLayout>
