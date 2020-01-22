@@ -138,8 +138,9 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recycler_view_requests"
                         android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        tools:listitem="@layout/requests_layout" />
+                        android:layout_height="150dp"
+                        tools:listitem="@layout/requests_layout"
+                        android:visibility="gone"/>
 
                 </RelativeLayout>
 

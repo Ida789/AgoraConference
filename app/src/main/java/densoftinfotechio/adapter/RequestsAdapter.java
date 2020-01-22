@@ -34,22 +34,24 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         holder.tv_patientid.setText(requestsModels.get(position).getPatientId());
+
+        if(requestsModels.get(position).getStatus().equalsIgnoreCase("1")){
+            accepted(holder);
+        }else if(requestsModels.get(position).getStatus().equalsIgnoreCase("2")){
+            denied(holder);
+        }
         holder.tv_accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ((LiveActivityEvent)context).call_status("1", requestsModels.get(position).getPatientId()); //accept
-                holder.tv_accept.setText("Accepted");
-                holder.tv_accept.setEnabled(false);
-                holder.tv_deny.setEnabled(false);
+                accepted(holder);
             }
         });
         holder.tv_deny.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ((LiveActivityEvent)context).call_status("2", requestsModels.get(position).getPatientId()); //reject
-                holder.tv_accept.setText("Denied");
-                holder.tv_accept.setEnabled(false);
-                holder.tv_deny.setEnabled(false);
+                denied(holder);
             }
         });
     }
@@ -67,5 +69,21 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
             tv_accept = itemView.findViewById(R.id.tv_accept);
             tv_deny = itemView.findViewById(R.id.tv_deny);
         }
+    }
+
+    private void accepted(ViewHolder holder){
+        holder.tv_accept.setText("Accepted");
+        holder.tv_accept.setBackgroundResource(R.drawable.rounded_acceptrequest);
+        holder.tv_deny.setBackgroundResource(R.drawable.rounded_gray_background);
+        holder.tv_accept.setEnabled(false);
+        holder.tv_deny.setEnabled(false);
+    }
+
+    private void denied(ViewHolder holder){
+        holder.tv_deny.setText("Denied");
+        holder.tv_deny.setBackgroundResource(R.drawable.rounded_deniedrequest);
+        holder.tv_accept.setBackgroundResource(R.drawable.rounded_gray_background);
+        holder.tv_accept.setEnabled(false);
+        holder.tv_deny.setEnabled(false);
     }
 }

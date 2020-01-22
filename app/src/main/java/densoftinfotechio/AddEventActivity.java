@@ -165,7 +165,7 @@ public class AddEventActivity extends AppCompatActivity {
                 event_param.put("EventName", et_eventname.getText().toString());
                 event_param.put("EventId", doctorid);
                 event_param.put("EventDate", event_date);
-                event_param.put("Audience", et_audience.getText().toString());
+                event_param.put("ExpectedAudience", et_audience.getText().toString());
                 event_param.put("DoctorId", doctorid);
 
                 if (!dataSnapshot.exists()) {

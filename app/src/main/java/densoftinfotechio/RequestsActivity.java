@@ -36,6 +36,8 @@ public class RequestsActivity extends AppCompatActivity {
     private Calendar c = Calendar.getInstance();
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
 
+    private String ROLE_CO_HOST = "Co-Host";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,13 +55,13 @@ public class RequestsActivity extends AppCompatActivity {
         recycler_view_requests.setAdapter(requestsAdapter);
 
         if(preferences!=null && preferences.contains("id")){
-            databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child("Requests").addValueEventListener(new ValueEventListener() {
+            databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()){
                         requestsModels.clear();
                         for(DataSnapshot children: dataSnapshot.getChildren()){
-                            databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child("Requests").child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if(dataSnapshot.exists()) {
@@ -91,6 +93,6 @@ public class RequestsActivity extends AppCompatActivity {
     public void call_status(String i, String patientId) {
         HashMap<String, Object> param = new HashMap<>();
         param.put("Status", i);
-        databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child("Requests").child(patientId).updateChildren(param);
+        databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).child(patientId).updateChildren(param);
     }
 }

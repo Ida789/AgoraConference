@@ -75,4 +75,10 @@
 
     <dimen name="padd_10">10dp</dimen>
     <dimen name="video_indicator_bottom_margin">20dp</dimen>
+
+
+    <dimen name="standard_65">65dp</dimen>
+    <dimen name="standard_125">125dp</dimen>
+    <dimen name="standard_185">185dp</dimen>
+
 </resources>

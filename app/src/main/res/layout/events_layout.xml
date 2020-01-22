@@ -40,17 +40,6 @@
             android:layout_weight="1"
             android:layout_gravity="center"/>
 
-        <TextView
-            android:id="@+id/tv_startevent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start Event"
-            android:background="@drawable/rounded_bg_blue"
-            android:textColor="@color/white"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:layout_gravity="center"/>
-
     </LinearLayout>
 
     <LinearLayout
@@ -69,8 +58,7 @@
             android:layout_weight="1"
             android:background="@drawable/rounded_bg_blue"
             android:textColor="@color/white"
-            android:padding="3dp"
-            android:visibility="gone"/>
+            android:padding="3dp"/>
 
         <TextView
             android:id="@+id/tv_inviteasaudience"
@@ -82,8 +70,19 @@
             android:background="@drawable/rounded_bg_blue"
             android:textColor="@color/white"
             android:padding="3dp"
-            android:layout_marginStart="2dp"
-            android:visibility="gone"/>
+            android:layout_marginStart="2dp" />
+
+        <TextView
+            android:id="@+id/tv_startevent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Join Event"
+            android:background="@drawable/rounded_bg_blue"
+            android:textColor="@color/white"
+            android:padding="3dp"
+            android:layout_marginStart="2dp" />
 
     </LinearLayout>
 

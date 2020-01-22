@@ -35,6 +35,7 @@ import densoftinfotechio.DoctorViewActivity;
 import densoftinfotechio.PatientViewActivity;
 import densoftinfotechio.adapter.RequestsAdapter;
 import densoftinfotechio.agora.openlive.R;
+import densoftinfotechio.model.EventsModel;
 import densoftinfotechio.model.PatientRequestsModel;
 import densoftinfotechio.screenshare.app.BroadcasterActivity;
 import densoftinfotechio.videocall.openlive.stats.LocalStatsData;
@@ -63,6 +64,10 @@ public class LiveActivityEvent extends RtcBaseActivity {
     private DatabaseReference databaseReference;
     private Calendar c = Calendar.getInstance();
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+    private SimpleDateFormat simpleDateFormat_time = new SimpleDateFormat("HH:mm", Locale.getDefault());
+    String test_time = "17:45";
+    private String ROLE_CO_HOST = "Co-Host";
+    RelativeLayout bottom_container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,28 +79,63 @@ public class LiveActivityEvent extends RtcBaseActivity {
         initUI();
         tv_time = findViewById(R.id.tv_time);
         initData();
-
         recycler_view_requests = findViewById(R.id.recycler_view_requests);
+
+        bottom_container = findViewById(R.id.bottom_container);
+
+        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")){
+            recycler_view_requests.setVisibility(View.VISIBLE);
+            bottom_container.setVisibility(View.VISIBLE);
+        }else{
+            recycler_view_requests.setVisibility(View.GONE);
+            bottom_container.setVisibility(View.GONE);
+        }
+
+
+
         layoutManager = new LinearLayoutManager(LiveActivityEvent.this);
         recycler_view_requests.setLayoutManager(layoutManager);
 
-        published_event();
+        get_audience();
     }
 
-    private void published_event() {
+    private void get_audience() {
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
 
         requestsAdapter = new RequestsAdapter(LiveActivityEvent.this, requestsModels);
         recycler_view_requests.setAdapter(requestsAdapter);
 
+        databaseReference.child("Events").child(sharedPreferences.getString("id", "")).child(simpleDateFormat.format(c.getTime()))
+                .child(test_time/*simpleDateFormat_time.format(c.getTime())*/).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    EventsModel eventsModel = dataSnapshot.getValue(EventsModel.class);
+                    if(eventsModel!=null){
+                        published_events(eventsModel.getExpectedAudience());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void published_events(final String audience){
         if(sharedPreferences!=null && sharedPreferences.contains("id")){
-            databaseReference.child("Events").child(sharedPreferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child("Requests").addValueEventListener(new ValueEventListener() {
+            databaseReference.child("Events").child(sharedPreferences.getString("id", "")).child(simpleDateFormat.format(c.getTime()))
+                    .child(test_time/*simpleDateFormat_time.format(c.getTime())*/).child(ROLE_CO_HOST).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()){
                         requestsModels.clear();
                         for(DataSnapshot children: dataSnapshot.getChildren()){
-                            databaseReference.child("Events").child(sharedPreferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child("Requests").child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            databaseReference.child("Events").child(sharedPreferences.getString("id", ""))
+                                    .child(simpleDateFormat.format(c.getTime())).child(test_time/*simpleDateFormat_time.format(c.getTime())*/)
+                                    .child(ROLE_CO_HOST).child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if(dataSnapshot.exists()) {
@@ -382,6 +422,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
     public void call_status(String i, String patientId) {
         HashMap<String, Object> param = new HashMap<>();
         param.put("Status", i);
-        databaseReference.child("Events").child(sharedPreferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child("Requests").child(patientId).updateChildren(param);
+        databaseReference.child("Events").child(sharedPreferences.getString("id", "")).child(simpleDateFormat.format(c.getTime()))
+                .child(test_time/*simpleDateFormat_time.format(c.getTime())*/).child(ROLE_CO_HOST).child(patientId).updateChildren(param);
     }
 }

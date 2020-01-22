@@ -16,11 +16,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -38,7 +33,9 @@ public class LoginActivity extends AppCompatActivity {
     private String[] PERMISSIONS = {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
     };
 
     @Override
@@ -52,8 +49,6 @@ public class LoginActivity extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
         edit = preferences.edit();
         check_deeplinking();
-
-        deletethis();
 
         tv_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,10 +77,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void deletethis() {
-
     }
 
     @Override
@@ -173,19 +164,17 @@ public class LoginActivity extends AppCompatActivity {
                     //Uri data1 = this.getIntent().getData();
                     //if (data1 != null && data1.isHierarchical()) {
                     String uri = this.getIntent().getDataString();
-                    Log.i("MyApp", "Deep link clicked " + uri); //https://blog.ida.org.in/?channel=2111&type=Co-Host
+                    Log.i("MyApp", "Deep link clicked " + uri); //https://blog.ida.org.in/?channel=3000&type=Co-Host
 
                     if (data.toString().split("\\?").length > 1) {
-                        String datauri = data.toString().split("\\?")[1]; //doctor=2111&channel=2111&type=Co-Host&eventdate=17-01-2020&eventtime=14:00
+                        String datauri = data.toString().split("\\?")[1]; //channel=3000&type=Co-Host
                         String data_replace = datauri.replace("channel=", "").replace("type=", "");
 
-                        if (data_replace.split("&").length > 3) {
+                        if (data_replace.split("&").length > 1) {
                             Intent i = new Intent(LoginActivity.this, WaitingActivity.class);
-                            //i.putExtra("doctor", data_replace.split("&")[0]);
                             i.putExtra("channelname", data_replace.split("&")[0]);
                             i.putExtra("type", data_replace.split("&")[1]);
-                            //i.putExtra("eventdate", data_replace.split("&")[3]);
-                            //i.putExtra("eventtime", data_replace.split("&")[4]);
+                            i.putExtra("doctor", "3000");
                             startActivity(i);
                             finish();
                         }

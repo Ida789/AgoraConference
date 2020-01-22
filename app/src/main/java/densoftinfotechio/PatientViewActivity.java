@@ -71,9 +71,9 @@ public class PatientViewActivity extends AppCompatActivity {
         edit = preferences.edit();
         if (preferences != null && preferences.contains("id")) {
             et_patient_id.setText(preferences.getString("id", ""));
-        }
 
-        //FirebaseApp.initializeApp(PatientViewActivity.this);
+            delete_this_method();
+        }
 
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
 
@@ -137,6 +137,13 @@ public class PatientViewActivity extends AppCompatActivity {
 
     }
 
+    private void delete_this_method() {
+        Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
+        i.putExtra("accountname", preferences.getString("id",""));
+        i.putExtra("friendname", "3000");
+        startActivity(i);
+    }
+
     public void gotoCall(final String doctor, final String date, final String patient, final String channel, final String sessionType) {
         databaseReference.child("DoctorList").child(doctor).child(date).child(patient).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -151,7 +158,6 @@ public class PatientViewActivity extends AppCompatActivity {
                     if (sessionType.equalsIgnoreCase("Video")) {
                         Intent i = new Intent(PatientViewActivity.this, MainActivity.class);
                         i.putExtra("channelname", channel);
-                        i.putExtra("type", "Host");
                         startActivity(i);
                         finish();
 
@@ -159,13 +165,12 @@ public class PatientViewActivity extends AppCompatActivity {
                         Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                         i.putExtra("channelname", channel);
                         startActivity(i);
-                    } else {
-                       /*Intent i = new Intent(PatientViewActivity.this, MainActivity.class);
-                        i.putExtra("channelname", channel);
-                        startActivity(i);*/
+                    } else if(sessionType.equalsIgnoreCase("Text")){
+                        Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
+                        i.putExtra("accountname", patient);
+                        i.putExtra("friendname", doctor);
+                        startActivity(i);
                     }
-
-
                 }
             }
 

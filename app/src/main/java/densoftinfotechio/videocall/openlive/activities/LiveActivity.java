@@ -37,8 +37,6 @@ public class LiveActivity extends RtcBaseActivity {
     private SharedPreferences sharedPreferences;
 
     private VideoEncoderConfiguration.VideoDimensions mVideoDimension;
-    private static final long START_TIME_IN_MILLIS = 900000;
-
     TextView tv_time;
 
     @Override

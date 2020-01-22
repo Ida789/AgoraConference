@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 import densoftinfotechio.classes.Constants;
+import densoftinfotechio.realtimemessaging.agora.activity.LoginActivity;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 import densoftinfotechio.agora.openlive.R;
 
@@ -55,8 +56,10 @@ public class CallingActivity extends AppCompatActivity {
         if (b != null && b.containsKey("patientid") && b.containsKey("channelname") && b.containsKey("sessiontype")) {
             if(b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
                 tv_patientid.setText(getResources().getString(R.string.receiving_videocall_patientid) + " " + b.getString("patientid"));
-            }else{
+            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Audio")){
                 tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_patientid) + " " + b.getString("patientid"));
+            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Text")){
+                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_patientid) + " " + b.getString("patientid"));
             }
 
             tv_accept.setOnClickListener(new View.OnClickListener() {
@@ -70,8 +73,10 @@ public class CallingActivity extends AppCompatActivity {
 
             if(b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
                 tv_patientid.setText(getResources().getString(R.string.receiving_videocall_doctorid) + " " + b.getString("doctorid"));
-            }else{
+            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Audio")){
                 tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_doctorid) + " " + b.getString("doctorid"));
+            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Text")){
+                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_doctorid) + " " + b.getString("doctorid"));
             }
 
             tv_accept.setOnClickListener(new View.OnClickListener() {
@@ -122,6 +127,12 @@ public class CallingActivity extends AppCompatActivity {
                                 }else if(sessiontype.trim().equalsIgnoreCase("Audio")){
                                     Intent i = new Intent(CallingActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                                     i.putExtra("channelname", channelname);
+                                    startActivity(i);
+                                    finish();
+                                }else if(sessiontype.trim().equalsIgnoreCase("Text")){
+                                    Intent i = new Intent(CallingActivity.this, LoginActivity.class);
+                                    i.putExtra("accountname", preferences.getString("id", "")); //doctor
+                                    i.putExtra("friendname", patient_id); //patient
                                     startActivity(i);
                                     finish();
                                 }
@@ -177,6 +188,12 @@ public class CallingActivity extends AppCompatActivity {
                                 }else if(sessiontype.trim().equalsIgnoreCase("Audio")){
                                     Intent i = new Intent(CallingActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                                     i.putExtra("channelname", channelname);
+                                    startActivity(i);
+                                    finish();
+                                }else if(sessiontype.trim().equalsIgnoreCase("Text")){
+                                    Intent i = new Intent(CallingActivity.this, LoginActivity.class);
+                                    i.putExtra("accountname", preferences.getString("id", "")); //patient
+                                    i.putExtra("friendname", doctorid); //doctor
                                     startActivity(i);
                                     finish();
                                 }

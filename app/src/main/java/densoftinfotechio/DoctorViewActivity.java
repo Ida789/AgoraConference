@@ -76,6 +76,8 @@ public class DoctorViewActivity extends AppCompatActivity {
         edit = preferences.edit();
         if (preferences != null && preferences.contains("id")) {
             et_doctor_id.setText(preferences.getString("id", ""));
+
+            delete_this_method();
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
@@ -282,4 +284,11 @@ public class DoctorViewActivity extends AppCompatActivity {
         //startService(new Intent(DoctorViewActivity.this, BackgroundServiceNotification.class));
         super.onStop();
     }
+    private void delete_this_method() {
+        Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
+        i.putExtra("accountname", preferences.getString("id",""));
+        i.putExtra("friendname", "111");
+        startActivity(i);
+    }
+
 }

@@ -56,6 +56,7 @@ public class RoleActivity extends BaseActivity {
     }
 
     private void gotoLiveActivity(int role) {
+        //normal flow
         Intent intent = new Intent(getIntent());
         intent.putExtra(densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE, role);
         intent.setClass(getApplicationContext(), LiveActivity.class);
@@ -64,6 +65,7 @@ public class RoleActivity extends BaseActivity {
     }
 
     private void gotoLiveEventActivity(int role) {
+        //deep link flow
         Intent intent = new Intent(getIntent());
         intent.putExtra(densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE, role);
         intent.setClass(getApplicationContext(), LiveActivityEvent.class);

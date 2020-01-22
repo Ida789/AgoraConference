@@ -4,6 +4,7 @@ public class PatientRequestsModel {
     private String PatientId = "";
     private String Status = "";
     private String StartEvent = "";
+    private String Type = "";
 
     public PatientRequestsModel(){
 
@@ -31,5 +32,13 @@ public class PatientRequestsModel {
 
     public void setStartEvent(String startEvent) {
         StartEvent = startEvent;
+    }
+
+    public String getType() {
+        return Type;
+    }
+
+    public void setType(String type) {
+        Type = type;
     }
 }

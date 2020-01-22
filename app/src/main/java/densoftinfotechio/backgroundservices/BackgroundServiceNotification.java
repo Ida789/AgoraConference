@@ -41,6 +41,7 @@ public class BackgroundServiceNotification extends Service {
 
     @Override
     public void onCreate() {
+
         /*Log.d("OnCreate", "Invoke background service onCreate method.");
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -111,7 +112,7 @@ public class BackgroundServiceNotification extends Service {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel("Densoft_VideoCall", "Paysmart", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel notificationChannel = new NotificationChannel("Densoft_VideoCall", "OpenLive-Android", NotificationManager.IMPORTANCE_DEFAULT);
 
             //Configure the notification channel
             notificationChannel.setName(title);

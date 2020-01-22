@@ -10,7 +10,7 @@ public class EventsModel {
     private String EventName = "";
     private String FromTime = "";
     private String TotalTime = "";
-    private String Audience = "";
+    private String ExpectedAudience = "";
 
     public EventsModel(){
 
@@ -64,12 +64,12 @@ public class EventsModel {
         TotalTime = totalTime;
     }
 
-    public String getAudience() {
-        return Audience;
+    public String getExpectedAudience() {
+        return ExpectedAudience;
     }
 
-    public void setAudience(String audience) {
-        Audience = audience;
+    public void setExpectedAudience(String expectedAudience) {
+        ExpectedAudience = expectedAudience;
     }
 
     @NonNull

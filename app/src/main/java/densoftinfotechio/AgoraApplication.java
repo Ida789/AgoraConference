@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import densoftinfotechio.audiocall.openlive.voice.only.model.CurrentUserSettings;
 import densoftinfotechio.audiocall.openlive.voice.only.model.WorkerThread;
+import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.videocall.openlive.Constants;
 import densoftinfotechio.videocall.openlive.rtc.EngineConfig;
 import densoftinfotechio.videocall.openlive.stats.StatsManager;
@@ -21,6 +22,8 @@ public class AgoraApplication extends Application{
     private AgoraEventHandler mHandler = new AgoraEventHandler();
     private StatsManager mStatsManager = new StatsManager();
     private WorkerThread mWorkerThread;
+    private ChatManager mChatManager;
+    private static AgoraApplication sInstance;
 
     @Override
     public void onCreate() {
@@ -31,11 +34,19 @@ public class AgoraApplication extends Application{
             mRtcEngine.enableVideo();
             mRtcEngine.enableWebSdkInteroperability(true);
             mRtcEngine.setLogFile(FileUtil.initializeLogFile(this));
+
+            sInstance = this;
+            mChatManager = new ChatManager(this);
+            mChatManager.init();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         initConfig();
+    }
+
+    public static AgoraApplication the() {
+        return sInstance;
     }
 
     public synchronized void initWorkerThread() {
@@ -82,6 +93,10 @@ public class AgoraApplication extends Application{
     public void registerEventHandler(EventHandler handler) { mHandler.addHandler(handler); }
 
     public void removeEventHandler(EventHandler handler) { mHandler.removeHandler(handler); }
+
+    public ChatManager getChatManager() {
+        return mChatManager;
+    }
 
     @Override
     public void onTerminate() {
