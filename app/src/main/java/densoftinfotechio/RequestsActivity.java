@@ -55,13 +55,13 @@ public class RequestsActivity extends AppCompatActivity {
         recycler_view_requests.setAdapter(requestsAdapter);
 
         if(preferences!=null && preferences.contains("id")){
-            databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).addValueEventListener(new ValueEventListener() {
+            databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()){
                         requestsModels.clear();
                         for(DataSnapshot children: dataSnapshot.getChildren()){
-                            databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if(dataSnapshot.exists()) {
@@ -90,9 +90,9 @@ public class RequestsActivity extends AppCompatActivity {
         }
     }
 
-    public void call_status(String i, String patientId) {
+    public void call_status(String i, int patientId) {
         HashMap<String, Object> param = new HashMap<>();
         param.put("Status", i);
-        databaseReference.child("Events").child(preferences.getString("id", "")).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).child(patientId).updateChildren(param);
+        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(simpleDateFormat.format(c.getTime())).child(ROLE_CO_HOST).child(String.valueOf(patientId)).updateChildren(param);
     }
 }

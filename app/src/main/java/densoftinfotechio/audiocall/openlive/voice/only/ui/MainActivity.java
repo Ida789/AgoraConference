@@ -59,7 +59,7 @@ public class MainActivity extends BaseActivity {
 
         Bundle b = getIntent().getExtras();
         if(b!=null && b.containsKey("channelname")) {
-            v_room.setText(b.getString("channelname").replace("-", "").trim());
+            v_room.setText(String.valueOf(b.getInt("channelname")));
             String room = v_room.getText().toString();
             forwardToLiveRoom(Constants.CLIENT_ROLE_BROADCASTER, room);
         }else{

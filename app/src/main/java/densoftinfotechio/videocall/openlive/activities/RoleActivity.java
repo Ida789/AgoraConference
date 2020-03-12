@@ -2,6 +2,7 @@ package densoftinfotechio.videocall.openlive.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -33,6 +34,8 @@ public class RoleActivity extends BaseActivity {
 
         b = getIntent().getExtras();
         if(b!=null && b.containsKey("type")){
+            //deep link flow
+
             if(b.getString("type","").equalsIgnoreCase("Host")) {
                 gotoLiveEventActivity(Constants.CLIENT_ROLE_BROADCASTER);
             }else if(b.getString("type","").equalsIgnoreCase("Co-Host")){
@@ -41,9 +44,12 @@ public class RoleActivity extends BaseActivity {
                 gotoLiveEventActivity(Constants.CLIENT_ROLE_AUDIENCE);
             }
         }else if(b!=null && b.containsKey("channelname")){
+            //normal flow
             gotoLiveActivity(Constants.CLIENT_ROLE_BROADCASTER);
+            Log.d("here flow ", "part 2 broadcaster");
         }else{
             gotoLiveActivity(Constants.CLIENT_ROLE_AUDIENCE);
+            Log.d("here flow ", "part 2 audience");
         }
     }
 
@@ -59,6 +65,7 @@ public class RoleActivity extends BaseActivity {
         //normal flow
         Intent intent = new Intent(getIntent());
         intent.putExtra(densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE, role);
+        Log.d("here flow ", "part 3 Role Activity");
         intent.setClass(getApplicationContext(), LiveActivity.class);
         startActivity(intent);
         finish();

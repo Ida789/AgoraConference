@@ -60,7 +60,8 @@
         android:layout_below="@id/selection_name"
         android:layout_alignLeft="@id/selection_name"
         android:layout_alignStart="@id/selection_name"
-        android:text="@string/hint_enable_offline_message"/>
+        android:text="@string/hint_enable_offline_message"
+        android:checked="true"/>
 
     <RadioGroup
         android:id="@+id/mode_radio_group"

@@ -18,14 +18,10 @@ import densoftinfotechio.classes.Constants;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHolder> {
 
-    private Context ctx;
+    private Context context;
 
-    //ArrayList<Uri> mArrayUri;
-
-    public GalleryAdapter(Context ctx, ArrayList<Uri> mArrayUri) {
-
-        this.ctx = ctx;
-        //this.mArrayUri = mArrayUri;
+    public GalleryAdapter(Context context, ArrayList<Uri> mArrayUri) {
+        this.context = context;
     }
 
 
@@ -38,36 +34,41 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
-        holder.ivGallery.setImageURI(Constants.images_uri.get(position));
+        holder.ivGallery.setImageURI(Constants.uris.get(position));
         holder.ivdelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //mArrayUri.remove(position);
-                Constants.images_uri.remove(position);
+                Constants.uris.remove(position);
                 notifyDataSetChanged();
 
-                for(int i = 0; i<Constants.images_uri.size(); i++){
-                    Log.d("images ", Constants.images_uri.get(i) + "");
+                /*for (int i = 0; i < Constants.uris.size(); i++) {
+                    Log.d("images ", Constants.uris.get(i) + "");
                 }
-                Log.d("size ", Constants.images_uri.size() + "");
+                Log.d("size ", Constants.uris.size() + "");*/
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return Constants.images_uri.size();
+
+        if(Constants.uris.size()>0)
+            return Constants.uris.size();
+        else{
+            return 0;
+        }
     }
 
 
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         private ImageView ivGallery, ivdelete;
 
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivGallery = (ImageView) itemView.findViewById(R.id.ivGallery);
-            ivdelete = (ImageView) itemView.findViewById(R.id.ivdelete);
+            ivGallery = itemView.findViewById(R.id.ivGallery);
+            ivdelete = itemView.findViewById(R.id.ivdelete);
         }
     }
 }

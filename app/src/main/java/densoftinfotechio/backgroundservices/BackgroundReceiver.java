@@ -36,10 +36,10 @@ public class BackgroundReceiver extends BroadcastReceiver {
             databaseReference = FirebaseDatabase.getInstance().getReference("DoctorsList");
 
             if(intent.getExtras().containsKey("patientid")) {
-                doctor_joined(context, intent.getExtras().getString("patientid", ""), intent.getExtras().getString("channelname", ""),
+                doctor_joined(context, intent.getExtras().getInt("patientid", 0), intent.getExtras().getInt("channelname", 0),
                         intent.getExtras().getString("dateofcall", ""), intent.getExtras().getString("sessiontype", ""));
             }else if(intent.getExtras().containsKey("doctorid")){
-                patient_joined(context, intent.getExtras().getString("doctorid", ""), intent.getExtras().getString("channelname", ""),
+                patient_joined(context, intent.getExtras().getInt("doctorid", 0), intent.getExtras().getInt("channelname", 0),
                         intent.getExtras().getString("dateofcall", ""), intent.getExtras().getString("sessiontype", ""));
             }
 
@@ -48,21 +48,21 @@ public class BackgroundReceiver extends BroadcastReceiver {
         }
     }
 
-    private void doctor_joined(final Context context, final String patient_id, final String channelname, final String dateofcall, final String sessiontype){
+    private void doctor_joined(final Context context, final int patient_id, final int channelname, final String dateofcall, final String sessiontype){
 
         if(preferences!=null && preferences.contains("id")){
-            databaseReference.child("DoctorList").child("doctor" + preferences.getString("id", "")).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        databaseReference.child("DoctorList").child("doctor" + preferences.getString("id", "")).child(dateofcall).child(patient_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(patient_id)).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 HashMap<String, Object> initiatecall  = new HashMap<>();
-                                initiatecall.put("InitiateCall", "2");
-                                databaseReference.child("DoctorList").child("doctor" + preferences.getString("id", "")).child(dateofcall).child(patient_id).updateChildren(initiatecall);
-                                databaseReference.child("PatientList").child(patient_id).child(dateofcall).child(preferences.getString("id", "")).updateChildren(initiatecall);
+                                initiatecall.put("InitiateCall", 2);
+                                databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(patient_id)).updateChildren(initiatecall);
+                                databaseReference.child("PatientList").child(String.valueOf(patient_id)).child(dateofcall).child(preferences.getString("id", "")).updateChildren(initiatecall);
 
                                 /*Intent i = new Intent(context, MainActivity.class);
                                 i.putExtra("channelname", channelname);
@@ -106,21 +106,21 @@ public class BackgroundReceiver extends BroadcastReceiver {
         }
     }
 
-    private void patient_joined(final Context context, final String doctorid, final String channelname, final String dateofcall, final String sessiontype){
+    private void patient_joined(final Context context, final int doctorid, final int channelname, final String dateofcall, final String sessiontype){
 
         if(preferences!=null && preferences.contains("id")){
-            databaseReference.child("PatientList").child(preferences.getString("id", "")).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        databaseReference.child("PatientList").child(preferences.getString("id", "")).child(dateofcall).child(doctorid).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("PatientList").child(preferences.getString("id", "")).child(dateofcall).child(String.valueOf(doctorid)).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 HashMap<String, Object> initiatecall  = new HashMap<>();
-                                initiatecall.put("InitiateCall", "2");
-                                databaseReference.child("PatientList").child(preferences.getString("id", "")).child(dateofcall).child(doctorid).updateChildren(initiatecall);
-                                databaseReference.child("DoctorList").child("doctor" + doctorid).child(dateofcall).child(preferences.getString("id", "")).updateChildren(initiatecall);
+                                initiatecall.put("InitiateCall", 2);
+                                databaseReference.child("PatientList").child(preferences.getString("id", "")).child(dateofcall).child(String.valueOf(doctorid)).updateChildren(initiatecall);
+                                databaseReference.child("DoctorList").child("doctor" + doctorid).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
 
                                 /*Intent i = new Intent(context, MainActivity.class);
                                 i.putExtra("channelname", channelname);

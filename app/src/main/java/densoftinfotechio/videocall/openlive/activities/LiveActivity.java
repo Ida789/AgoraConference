@@ -269,6 +269,21 @@ public class LiveActivity extends RtcBaseActivity {
 
     public void onPushStreamClicked(View view) {
         // Do nothing at the moment
+
+        Intent i = new Intent(LiveActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
+
+        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
+            Log.d("here flow ", "part 3 Live Activity doctor");
+            i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.doctorId);
+            i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.patientId);
+        }else{
+            Log.d("here flow ", "part 3 Live Activity patient");
+            i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.patientId);
+            i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.doctorId);
+        }
+        startActivity(i);
+        finish();
+
     }
 
     public void onMuteAudioClicked(View view) {

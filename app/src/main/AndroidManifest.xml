@@ -126,8 +126,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name="densoftinfotechio.realtimemessaging.agora.activity.MessageActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden"/>
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

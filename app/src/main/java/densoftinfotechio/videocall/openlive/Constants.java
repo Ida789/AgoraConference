@@ -32,4 +32,8 @@ public class Constants {
     public static final String KEY_CLIENT_ROLE = "key_client_role";
 
     public static int callinitiatedInActivity = 0;
+
+    public static int doctorId = 0;
+    public static int patientId = 0;
+
 }

@@ -55,34 +55,34 @@ public class CallingActivity extends AppCompatActivity {
         b = getIntent().getExtras();
         if (b != null && b.containsKey("patientid") && b.containsKey("channelname") && b.containsKey("sessiontype")) {
             if(b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
-                tv_patientid.setText(getResources().getString(R.string.receiving_videocall_patientid) + " " + b.getString("patientid"));
+                tv_patientid.setText(getResources().getString(R.string.receiving_videocall_patientid) + " " + b.getInt("patientid", 0));
             }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Audio")){
-                tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_patientid) + " " + b.getString("patientid"));
+                tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_patientid) + " " + b.getInt("patientid", 0));
             }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Text")){
-                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_patientid) + " " + b.getString("patientid"));
+                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_patientid) + " " + b.getInt("patientid", 0));
             }
 
             tv_accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    doctor_joined(b.getString("patientid"), b.getString("channelname"), b.getString("dateofcall"), b.getString("sessiontype"));
+                    doctor_joined(b.getInt("patientid", 0), b.getInt("channelname"), b.getString("dateofcall"), b.getString("sessiontype"));
                 }
             });
 
         } else if (b != null && b.containsKey("doctorid") && b.containsKey("channelname") && b.containsKey("sessiontype")){
 
             if(b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
-                tv_patientid.setText(getResources().getString(R.string.receiving_videocall_doctorid) + " " + b.getString("doctorid"));
+                tv_patientid.setText(getResources().getString(R.string.receiving_videocall_doctorid) + " " + b.getInt("doctorid",0));
             }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Audio")){
-                tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_doctorid) + " " + b.getString("doctorid"));
+                tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_doctorid) + " " + b.getInt("doctorid",0));
             }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Text")){
-                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_doctorid) + " " + b.getString("doctorid"));
+                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_doctorid) + " " + b.getInt("doctorid",0));
             }
 
             tv_accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    patient_joined(b.getString("doctorid"), b.getString("channelname"), b.getString("dateofcall"), b.getString("sessiontype"));
+                    patient_joined(b.getInt("doctorid", 0), b.getInt("channelname", 0), b.getString("dateofcall"), b.getString("sessiontype"));
                 }
             });
         }else{
@@ -98,25 +98,25 @@ public class CallingActivity extends AppCompatActivity {
 
     }
 
-    private void doctor_joined(final String patient_id, final String channelname, final String dateofcall, final String sessiontype) {
+    private void doctor_joined(final int patient_id, final int channelname, final String dateofcall, final String sessiontype) {
 
         if (preferences != null && preferences.contains("id")) {
-            databaseReference.child("DoctorList").child(preferences.getString("id", "")).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        databaseReference.child("DoctorList").child(preferences.getString("id", "")).child(dateofcall).child(patient_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(patient_id)).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 HashMap<String, Object> initiatecall = new HashMap<>();
-                                initiatecall.put("InitiateCall", "2");
-                                databaseReference.child("DoctorList").child(preferences.getString("id", "")).child(dateofcall).child(patient_id).updateChildren(initiatecall);
-                                databaseReference.child("PatientList").child(patient_id).child(dateofcall).child(preferences.getString("id", "")).updateChildren(initiatecall);
+                                initiatecall.put("InitiateCall", 2);
+                                databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(patient_id)).updateChildren(initiatecall);
+                                databaseReference.child("PatientList").child(String.valueOf(patient_id)).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
 
                                 //status 2 for call accepted, 3 for call rejected
 
-                                //if(value.equalsIgnoreCase("2")){
+                                //if(value.equalsIgnoreCase(2)){
 
                                 if(sessiontype.trim().equalsIgnoreCase("Video")){
                                     Intent i = new Intent(CallingActivity.this, MainActivity.class);
@@ -131,7 +131,7 @@ public class CallingActivity extends AppCompatActivity {
                                     finish();
                                 }else if(sessiontype.trim().equalsIgnoreCase("Text")){
                                     Intent i = new Intent(CallingActivity.this, LoginActivity.class);
-                                    i.putExtra("accountname", preferences.getString("id", "")); //doctor
+                                    i.putExtra("accountname", preferences.getInt("id", 0)); //doctor
                                     i.putExtra("friendname", patient_id); //patient
                                     startActivity(i);
                                     finish();
@@ -161,24 +161,24 @@ public class CallingActivity extends AppCompatActivity {
         }
     }
 
-    private void patient_joined(final String doctorid, final String channelname, final String dateofcall, final String sessiontype) {
+    private void patient_joined(final int doctorid, final int channelname, final String dateofcall, final String sessiontype) {
 
         if (preferences != null && preferences.contains("id")) {
-            databaseReference.child("PatientList").child(preferences.getString("id", "")).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        databaseReference.child("PatientList").child(preferences.getString("id", "")).child(dateofcall).child(doctorid).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(doctorid)).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 HashMap<String, Object> initiatecall = new HashMap<>();
-                                initiatecall.put("InitiateCall", "2");
-                                databaseReference.child("PatientList").child(preferences.getString("id", "")).child(dateofcall).child(doctorid).updateChildren(initiatecall);
-                                databaseReference.child("DoctorList").child(doctorid).child(dateofcall).child(preferences.getString("id", "")).updateChildren(initiatecall);
+                                initiatecall.put("InitiateCall", 2);
+                                databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(doctorid)).updateChildren(initiatecall);
+                                databaseReference.child("DoctorList").child(String.valueOf(doctorid)).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
                                 //status 2 for call accepted, 3 for call rejected
 
-                                //if(value.equalsIgnoreCase("2")){
+                                //if(value.equalsIgnoreCase(2)){
 
                                 if(sessiontype.trim().equalsIgnoreCase("Video")){
                                     Intent i = new Intent(CallingActivity.this, MainActivity.class);
@@ -192,7 +192,7 @@ public class CallingActivity extends AppCompatActivity {
                                     finish();
                                 }else if(sessiontype.trim().equalsIgnoreCase("Text")){
                                     Intent i = new Intent(CallingActivity.this, LoginActivity.class);
-                                    i.putExtra("accountname", preferences.getString("id", "")); //patient
+                                    i.putExtra("accountname", preferences.getInt("id", 0)); //patient
                                     i.putExtra("friendname", doctorid); //doctor
                                     startActivity(i);
                                     finish();

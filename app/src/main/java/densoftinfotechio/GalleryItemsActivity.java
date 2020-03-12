@@ -29,7 +29,6 @@ public class GalleryItemsActivity extends AppCompatActivity {
     private RecyclerView recyclerview;
     private GalleryAdapter galleryAdapter;
     LinearLayoutManager layoutManager;
-    private Bundle b;
     Button btn;
 
     @Override
@@ -87,8 +86,8 @@ public class GalleryItemsActivity extends AppCompatActivity {
                     imageEncoded  = cursor.getString(columnIndex);
                     cursor.close();
 
-                    Constants.images_uri.add(mImageUri);
-                    galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.images_uri);
+                    Constants.uris.add(mImageUri);
+                    galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
                     recyclerview.setAdapter(galleryAdapter);
 
                 } else {
@@ -99,7 +98,7 @@ public class GalleryItemsActivity extends AppCompatActivity {
 
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uri = item.getUri();
-                            Constants.images_uri.add(uri);
+                            Constants.uris.add(uri);
                             // Get the cursor
                             Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
                             // Move to first row
@@ -110,11 +109,11 @@ public class GalleryItemsActivity extends AppCompatActivity {
                             imagesEncodedList.add(imageEncoded);
                             cursor.close();
 
-                            galleryAdapter = new GalleryAdapter(getApplicationContext(),Constants.images_uri);
+                            galleryAdapter = new GalleryAdapter(getApplicationContext(),Constants.uris);
                             recyclerview.setAdapter(galleryAdapter);
 
                         }
-                        Log.v("LOG_TAG", "Selected Images" + Constants.images_uri.size());
+                        Log.v("LOG_TAG", "Selected Images" + Constants.uris.size());
                     }
                 }
             } else {

@@ -91,7 +91,7 @@ public class AppointmentsActivity extends AppCompatActivity {
         recyclerview_eveningsessions.setLayoutManager(layoutManager2);
 
         if(preferences!=null && preferences.contains("id")){
-            et_patient_id.setText(preferences.getString("id", ""));
+            et_patient_id.setText(String.valueOf(preferences.getInt("id", 0)));
         }
 
         et_date.setOnClickListener(new View.OnClickListener() {
@@ -220,14 +220,15 @@ public class AppointmentsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> object = new HashMap<>();
+                object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("Day", day);
                 object.put("Date",et_date.getText().toString());
-                object.put("PatientId", et_patient_id.getText().toString());
-                object.put("DoctorId", et_doctor_id.getText().toString());
+                object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
+                object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
                 object.put("SessionTime", time);
                 object.put("SessionType", text);
-                object.put("Channel", et_doctor_id.getText().toString() + et_patient_id.getText().toString());
-                object.put("InitiateCall", "0");
+                object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
+                object.put("InitiateCall", 0);
                 object.put("Talktime", "15");
 
                 //FirebaseAppointmentModel firebaseAppointmentModel = new FirebaseAppointmentModel(text, time, et_patient_id.getText().toString(), getDay(et_day.getText().toString() + "-" + et_month.getText().toString() + "-" + et_year.getText().toString()));
@@ -249,14 +250,15 @@ public class AppointmentsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> object = new HashMap<>();
+                object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("Day", day);
                 object.put("Date",et_date.getText().toString());
-                object.put("PatientId", et_patient_id.getText().toString());
+                object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("SessionTime", time);
                 object.put("SessionType", text);
-                object.put("DoctorId", et_doctor_id.getText().toString());
-                object.put("Channel", et_doctor_id.getText().toString() + et_patient_id.getText().toString());
-                object.put("InitiateCall", "0");
+                object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
+                object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
+                object.put("InitiateCall", 0);
                 object.put("Talktime", "15");
 
                 //FirebaseAppointmentModel firebaseAppointmentModel = new FirebaseAppointmentModel(text, time, et_patient_id.getText().toString(), getDay(et_day.getText().toString() + "-" + et_month.getText().toString() + "-" + et_year.getText().toString()));

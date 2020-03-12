@@ -1,49 +1,66 @@
 package densoftinfotechio.realtimemessaging.agora.activity;
 
+import android.Manifest;
 import android.content.ClipData;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
-import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import densoftinfotechio.AgoraApplication;
-import densoftinfotechio.GalleryItemsActivity;
+import densoftinfotechio.DoctorViewActivity;
+import densoftinfotechio.LoginActivity;
+import densoftinfotechio.PatientViewActivity;
 import densoftinfotechio.ShowMediaActivity;
 import densoftinfotechio.adapter.GalleryAdapter;
 import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.classes.Constants;
+import densoftinfotechio.classes.DateAndTimeUtils;
+import densoftinfotechio.database.DatabaseHelper;
 import densoftinfotechio.realtimemessaging.agora.adapter.MessageAdapter;
 import densoftinfotechio.realtimemessaging.agora.model.MessageBean;
 import densoftinfotechio.realtimemessaging.agora.model.MessageListBean;
@@ -86,7 +103,7 @@ public class MessageActivity extends AppCompatActivity {
     private RtmClientListener mClientListener;
     private RtmChannel mRtmChannel;
     private boolean isFABOpen = false;
-    FloatingActionButton fab, fab1, fab2, fab3;
+    FloatingActionButton fab, fab_location, fab_video, fab_photo;
     private StorageReference storageReference;
     private FirebaseStorage firebaseStorage;
     private Uri filePath;
@@ -94,7 +111,14 @@ public class MessageActivity extends AppCompatActivity {
     Bundle b;
     String accountname = "", friendname = "";
     String msg = "";
-    ArrayList<String> message_urls = new ArrayList<>();
+    String imageEncoded;
+    List<String> imagesEncodedList;
+    private RecyclerView recyclerview;
+    private GalleryAdapter galleryAdapter;
+    LinearLayoutManager layoutManager;
+    String upload_type = "image";
+    FusedLocationProviderClient mFusedLocationClient;
+    int PERMISSION_ID = 44;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +130,9 @@ public class MessageActivity extends AppCompatActivity {
     private void init() {
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab1 = (FloatingActionButton) findViewById(R.id.fab1);
-        fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab_location = (FloatingActionButton) findViewById(R.id.fab_location);
+        fab_video = (FloatingActionButton) findViewById(R.id.fab_video);
+        fab_photo = (FloatingActionButton) findViewById(R.id.fab_photo);
 
         media_options();
 
@@ -117,9 +141,33 @@ public class MessageActivity extends AppCompatActivity {
         if (b != null && b.containsKey("accountname") && b.containsKey("friendname")) {
             accountname = b.getString("accountname");
             friendname = b.getString("friendname");
+
+            mMessageBeanList.clear();
+
+            getChat_from_sqlite(friendname);
+
+
         }
         //firebaseStorage = FirebaseStorage.getInstance("gs://videoconferencedemo.appspot.com");
         storageReference = FirebaseStorage.getInstance().getReference(Constants.firebasestoragename);
+
+        layoutManager = new LinearLayoutManager(MessageActivity.this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerview = findViewById(R.id.recyclerview);
+        recyclerview.setLayoutManager(layoutManager);
+
+        recyclerview.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@androidx.annotation.NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                Log.d("hey ", "onScrollStateChanged");
+            }
+
+            @Override
+            public void onScrolled(@androidx.annotation.NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                Log.d("hey ", "onScrolled");
+            }
+        });
 
         mChatManager = AgoraApplication.the().getChatManager();
         mRtmClient = mChatManager.getRtmClient();
@@ -178,49 +226,83 @@ public class MessageActivity extends AppCompatActivity {
 
     public void onClickSend(View v) {
 
-        if(message_urls.size()>0){
-            for(int i = 0; i<message_urls.size(); i++){
-                if (!message_urls.get(i).contains("~image") && !message_urls.get(i).contains("~video")) {
-                    msg = mMsgEditText.getText().toString();
-                } else {
-                    //message contains image url
+        msg = mMsgEditText.getText().toString();
+        if (mIsPeerToPeerMode) {
+            if (Constants.uris.size() > 0) {
+                recyclerview.setVisibility(View.VISIBLE);
+                for (int i = 0; i < Constants.uris.size(); i++) {
+                    BackgroundUpload backgroundUpload = new BackgroundUpload();
+                    backgroundUpload.execute(Constants.uris.get(i));
                 }
+            } else if (!msg.equals("")) {
+                MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                mMessageBeanList.add(messageBean);
+                mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+                sendPeerMessage(msg);
             }
-        }else{
-            if (!msg.contains("~image") && !msg.contains("~video")) {
-                msg = mMsgEditText.getText().toString();
-            } else {
-                //message contains image url
-            }
-        }
+            Constants.uris.clear();
 
-        /*if (!msg.contains("~image") || !msg.contains("~video")) {
-            msg = mMsgEditText.getText().toString();
         } else {
-            //message contains image url
-        }*/
-
-        if (!msg.equals("")) {
-            MessageBean messageBean = new MessageBean(mUserId, msg, true);
-            mMessageBeanList.add(messageBean);
-            mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
-            mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
-            if (mIsPeerToPeerMode) {
-                Log.d("message to send ", msg);
-                if(message_urls.size()>0){
-                    for(int i = 0; i<message_urls.size(); i++){
-                        sendPeerMessage(message_urls.get(i));
-                    }
-                }else{
-                    sendPeerMessage(msg);
+            if (Constants.uris.size() > 0) {
+                recyclerview.setVisibility(View.VISIBLE);
+                for (int i = 0; i < Constants.uris.size(); i++) {
+                    BackgroundUpload backgroundUpload = new BackgroundUpload();
+                    backgroundUpload.execute(Constants.uris.get(i));
                 }
-
-
-            } else {
+            } else if (!msg.equals("")) {
+                MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                mMessageBeanList.add(messageBean);
+                mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
                 sendChannelMessage(msg);
             }
+            Constants.uris.clear();
+
+
         }
+
+
         mMsgEditText.setText("");
+
+        /*if (message_urls.size() > 0) {
+            for (int i = 0; i < message_urls.size(); i++) {
+                if (!message_urls.get(i).contains("~image") && !message_urls.get(i).contains("~video")) {
+                    msg = mMsgEditText.getText().toString();
+                }
+            }
+        } else {
+            if (!msg.contains("~image") && !msg.contains("~video")) {
+                msg = mMsgEditText.getText().toString();
+            }
+        }
+
+        if (mIsPeerToPeerMode) {
+
+            if (message_urls.size() > 0) {
+                for (int i = 0; i < message_urls.size(); i++) {
+                    MessageBean messageBean = new MessageBean(mUserId, message_urls.get(i), true);
+                    mMessageBeanList.add(messageBean);
+                    mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                    mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+                    sendPeerMessage(message_urls.get(i));
+                    Log.d("message to send ", "from method" + message_urls.get(i));
+                }
+            } else if (!msg.equals("")) {
+                MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                mMessageBeanList.add(messageBean);
+                mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+                sendPeerMessage(msg);
+            }
+            Constants.images_uri.clear();
+            message_urls.clear();
+
+        } else {
+            sendChannelMessage(msg);
+        }
+
+        mMsgEditText.setText("");*/
     }
 
     private void media_options() {
@@ -240,21 +322,26 @@ public class MessageActivity extends AppCompatActivity {
 
     private void showFABMenu() {
         isFABOpen = true;
-        fab1.animate().translationY(-getResources().getDimension(R.dimen.standard_65));
-        fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_125));
-        fab3.animate().translationY(-getResources().getDimension(R.dimen.standard_185));
+        fab_location.animate().translationY(-getResources().getDimension(R.dimen.standard_65));
+        fab_video.animate().translationY(-getResources().getDimension(R.dimen.standard_125));
+        fab_photo.animate().translationY(-getResources().getDimension(R.dimen.standard_185));
 
-        fab3.setOnClickListener(new View.OnClickListener() {
+        fab_photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MessageActivity.this, GalleryItemsActivity.class);
+                /*Intent i = new Intent(MessageActivity.this, GalleryItemsActivity.class);
                 i.putExtra("opengallery", true);
-                startActivity(i);
+                startActivity(i);*/
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select"), 21);
 
             }
         });
 
-        fab2.setOnClickListener(new View.OnClickListener() {
+        fab_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -264,10 +351,13 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        fab1.setOnClickListener(new View.OnClickListener() {
+        fab_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(checkPermissions()){
+                    mFusedLocationClient = LocationServices.getFusedLocationProviderClient(MessageActivity.this);
+                    getLastLocation();
+                }
             }
         });
 
@@ -276,9 +366,9 @@ public class MessageActivity extends AppCompatActivity {
 
     private void closeFABMenu() {
         isFABOpen = false;
-        fab1.animate().translationY(0);
-        fab2.animate().translationY(0);
-        fab3.animate().translationY(0);
+        fab_location.animate().translationY(0);
+        fab_video.animate().translationY(0);
+        fab_photo.animate().translationY(0);
         rotateFabBackward();
     }
 
@@ -291,27 +381,50 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     public void onClickFinish(View v) {
-        finish();
+
+        //finish();
+
+        try {
+            mRtmClient.logout(null);
+            MessageUtil.cleanMessageListBeanList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (preferences != null && preferences.contains("loginpatient")) {
+            Intent i = new Intent(MessageActivity.this, PatientViewActivity.class);
+            startActivity(i);
+            finish();
+        } else if (preferences != null && preferences.contains("logindoctor")) {
+            Intent i = new Intent(MessageActivity.this, DoctorViewActivity.class);
+            startActivity(i);
+            finish();
+        } else {
+            Intent i = new Intent(MessageActivity.this, LoginActivity.class);
+            startActivity(i);
+            finish();
+        }
+
     }
 
     /**
      * API CALL: send message to peer
      */
-    private void sendPeerMessage(String content) {
+    private void sendPeerMessage(final String content) {
+        recyclerview.setVisibility(View.GONE);
         // step 1: create a message
         final RtmMessage message = mRtmClient.createMessage();
 
-        Log.d("message to method ", content);
         message.setText(content);
+        Log.d("content to send ", "from sendPeerMessage is " + content);
 
         // step 2: send message to peer
         mRtmClient.sendMessageToPeer(mPeerId, message, mChatManager.getSendMessageOptions(), new ResultCallback<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                // do nothing
-                Log.d("message to send ", message.toString());
-                Log.d("message details sent ", "\npeer id " + mPeerId + "\nmessage " + message +
-                        "\nChat Options " + mChatManager.getSendMessageOptions());
+
+                saveChat_in_sqlite(content, mPeerId, true);
+
             }
 
             @Override
@@ -331,12 +444,54 @@ public class MessageActivity extends AppCompatActivity {
                                 break;
                             case RtmStatusCode.PeerMessageError.PEER_MESSAGE_ERR_CACHED_BY_SERVER:
                                 //showToast(getString(R.string.message_cached));
+                                saveChat_in_sqlite(content, mPeerId, true);
                                 break;
+
                         }
                     }
                 });
             }
         });
+    }
+
+    private void saveChat_in_sqlite(String content, String mPeerId, boolean beSelf) {
+        try {
+            JSONObject messagebean = new JSONObject();
+            messagebean.put("account", preferences.getString("id", ""));
+            messagebean.put("message", content);
+            messagebean.put("beSelf", beSelf);
+
+            ContentValues c = new ContentValues();
+            c.put(DatabaseHelper.JSON_CHAT, messagebean.toString());
+            c.put(DatabaseHelper.ROOM_NAME, mPeerId);
+            c.put(DatabaseHelper.CHAT_DATE, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate());
+            c.put(DatabaseHelper.CHAT_TIME, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
+            DatabaseHelper.getInstance(MessageActivity.this).save_TABLE_CHAT(c, mPeerId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getChat_from_sqlite(String roomname) {
+        try {
+
+            JSONArray array_chat = DatabaseHelper.getInstance(MessageActivity.this).get_TABLE_CHAT(roomname);
+
+            Log.d("array ", array_chat + "");
+
+            if (array_chat != null && array_chat.length() > 0) {
+                for (int i = 0; i < array_chat.length(); i++) {
+                    JSONObject obj = new JSONObject(array_chat.optString(i));
+                    mMessageBeanList.add(new MessageBean(obj.getString("account"), obj.getString("message"),
+                            obj.optBoolean("beSelf")));
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -351,7 +506,7 @@ public class MessageActivity extends AppCompatActivity {
             return;
         }
 
-        Log.e("channel", mRtmChannel + "");
+        //Log.e("channel", mRtmChannel + "");
 
         // step 2: join the channel
         mRtmChannel.join(new ResultCallback<Void>() {
@@ -387,7 +542,7 @@ public class MessageActivity extends AppCompatActivity {
                     public void run() {
                         mChannelMemberCount = responseInfo.size();
                         refreshChannelTitle();
-                        Log.d("message details size ", "\nNumber of members  " + mChannelMemberCount);
+                        //Log.d("message details size ", "\nNumber of members  " + mChannelMemberCount);
                     }
                 });
             }
@@ -402,18 +557,21 @@ public class MessageActivity extends AppCompatActivity {
     /**
      * API CALL: send message to a channel
      */
-    private void sendChannelMessage(String content) {
+    private void sendChannelMessage(final String content) {
+        recyclerview.setVisibility(View.GONE);
         // step 1: create a message
         RtmMessage message = mRtmClient.createMessage();
         message.setText(content);
 
-        Log.e("channel", mRtmChannel + "");
+        Log.d("channel message ", content);
+
+        //Log.e("channel", mRtmChannel + "");
 
         // step 2: send message to channel
         mRtmChannel.sendMessage(message, new ResultCallback<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-
+                saveChat_in_sqlite(content, mChannelName, true);
             }
 
             @Override
@@ -446,9 +604,14 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
 
-    public void goto_image_fragment(String url) {
+    public void goto_showmedia_fragment(String url, String type) {
         Intent i = new Intent(MessageActivity.this, ShowMediaActivity.class);
-        i.putExtra("url", url);
+
+        if (type.equalsIgnoreCase("image"))
+            i.putExtra("urlimage", url);
+        else
+            i.putExtra("urlvideo", url);
+        //Log.d("url to open ", url);
         startActivity(i);
     }
 
@@ -482,7 +645,7 @@ public class MessageActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     String content = message.getText();
-                    Log.d("message recvd ", content);
+                    Log.d("message recvd ", "in onMessageReceives is " + content);
                     if (peerId.equals(mPeerId)) {
                         MessageBean messageBean = new MessageBean(peerId, content, false);
                         messageBean.setBackground(getMessageColor(peerId));
@@ -493,8 +656,10 @@ public class MessageActivity extends AppCompatActivity {
                         MessageUtil.addMessageBean(peerId, content);
                     }
 
-                    Log.d("message details recv ", "\npeer id " + peerId + "\nmessage " + message +
-                            "\ncontent " + content);
+                    saveChat_in_sqlite(content, peerId, false);
+
+                    /*Log.d("message details recv ", "\npeer id " + peerId + "\nmessage " + message +
+                            "\ncontent " + content);*/
                 }
             });
         }
@@ -531,6 +696,9 @@ public class MessageActivity extends AppCompatActivity {
                 public void run() {
                     String account = fromMember.getUserId();
                     String msg = message.getText();
+
+                    saveChat_in_sqlite(msg, account, false);
+
                     Log.i(TAG, "onMessageReceived account = " + account + " msg = " + msg);
                     MessageBean messageBean = new MessageBean(account, msg, false);
                     messageBean.setBackground(getMessageColor(account));
@@ -588,9 +756,62 @@ public class MessageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (data != null && data.getData() != null) {
-            if (requestCode == 22 && resultCode == RESULT_OK) {
-                if (data.getData() != null) {
+        try {
+            if (resultCode == RESULT_OK) {
+                // When an Image is picked
+                if (requestCode == 21 && null != data) {
+                    upload_type = "image";
+
+                    // Get the Image from data
+
+                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                    imagesEncodedList = new ArrayList<String>();
+                    if (data.getData() != null) {
+
+                        Uri mImageUri = data.getData();
+
+                        // Get the cursor
+                        Cursor cursor = getContentResolver().query(mImageUri,
+                                filePathColumn, null, null, null);
+                        // Move to first row
+                        cursor.moveToFirst();
+
+                        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                        imageEncoded = cursor.getString(columnIndex);
+                        cursor.close();
+
+                        Constants.uris.add(mImageUri);
+                        galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
+                        recyclerview.setAdapter(galleryAdapter);
+
+                    } else if (data.getClipData() != null) {
+                        ClipData mClipData = data.getClipData();
+                        //ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
+                        for (int i = 0; i < mClipData.getItemCount(); i++) {
+
+                            ClipData.Item item = mClipData.getItemAt(i);
+                            Uri uri = item.getUri();
+                            Constants.uris.add(uri);
+                            // Get the cursor
+                            Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
+                            // Move to first row
+                            cursor.moveToFirst();
+
+                            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                            imageEncoded = cursor.getString(columnIndex);
+                            imagesEncodedList.add(imageEncoded);
+                            cursor.close();
+
+                            galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
+                            recyclerview.setAdapter(galleryAdapter);
+
+                        }
+
+                        Log.v("LOG_TAG", "Selected Images" + Constants.uris.size());
+                    }
+                } else if (requestCode == 22 && data.getData() != null) {
+                    upload_type = "video";
+
                     Uri selectedVideoUri = data.getData();
                     String vidPath = "";
                     // OI FILE Manager
@@ -603,12 +824,17 @@ public class MessageActivity extends AppCompatActivity {
                         vidPath = selectedVideoPath;
                     }
                     Log.d("video path ", vidPath);
-                    uploadDatatoFirestore(selectedVideoUri, "video");
-                } else {
-                    Toast.makeText(getApplicationContext(), "Failed to select video", Toast.LENGTH_LONG).show();
+                    Constants.uris.add(selectedVideoUri);
+                    //uploadDatatoFirestore(selectedVideoUri, "video");
                 }
             }
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG)
+                    .show();
         }
+
+        /**/
     }
 
     public String getPath(Uri uri) {
@@ -643,11 +869,34 @@ public class MessageActivity extends AppCompatActivity {
 
                                     if (type.equalsIgnoreCase("image")) {
                                         Log.d("url download is ", uri.toString() + "~image");
-                                        msg = uri.toString() + "~image";
-                                        message_urls.add(msg);
+
+                                        MessageBean messageBean = new MessageBean(mUserId, (uri.toString() + "~image"), true);
+                                        mMessageBeanList.add(messageBean);
+                                        mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                                        mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+
+                                        if (mIsPeerToPeerMode) {
+                                            sendPeerMessage((uri.toString() + "~image"));
+                                        } else {
+                                            sendChannelMessage((uri.toString() + "~image"));
+                                        }
+
+                                        mMsgEditText.setText("");
+
                                     } else if (type.equalsIgnoreCase("video")) {
                                         Log.d("url download is ", uri.toString() + "~video");
-                                        msg = uri.toString() + "~video";
+
+                                        MessageBean messageBean = new MessageBean(mUserId, (uri.toString() + "~video"), true);
+                                        mMessageBeanList.add(messageBean);
+                                        mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                                        mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+
+                                        if (mIsPeerToPeerMode) {
+                                            sendPeerMessage((uri.toString() + "~video"));
+                                        } else {
+                                            sendChannelMessage((uri.toString() + "~video"));
+                                        }
+
                                     }
 
                                 }
@@ -659,61 +908,137 @@ public class MessageActivity extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
+                            Log.d("failed ", "uploading on server ");
                             //Toast.makeText(MessageActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
-                    /*.addOnProgressListener(
-                            new OnProgressListener<UploadTask.TaskSnapshot>() {
-
-                                // Progress Listener for loading
-                                // percentage on the dialog box
-                                @Override
-                                public void onProgress(
-                                        UploadTask.TaskSnapshot taskSnapshot) {
-                                    double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                                    progressDialog.setMessage("Uploaded " + (int) progress + "%");
-                                }
-                            });*/
         }
-    }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
     }
 
     @Override
     protected void onResume() {
-        if(Constants.images_uri!=null){
-            Log.d("total images ",  Constants.images_uri.size() + "");
-            for(int i = 0; i<Constants.images_uri.size(); i++){
-                BackgroundUpload backgroundUpload = new BackgroundUpload();
-                backgroundUpload.execute(Constants.images_uri.get(i));
-            }
-        }
-
         super.onResume();
     }
 
-    private class BackgroundUpload extends AsyncTask<Uri, Void, Void>{
+    private class BackgroundUpload extends AsyncTask<Uri, Void, Void> {
 
         @Override
         protected Void doInBackground(Uri... voids) {
-            uploadDatatoFirestore(voids[0], "image");
+            uploadDatatoFirestore(voids[0], upload_type);
             return null;
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        try {
+            mRtmClient.logout(null);
+            MessageUtil.cleanMessageListBeanList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (preferences != null && preferences.contains("loginpatient")) {
+            Intent i = new Intent(MessageActivity.this, PatientViewActivity.class);
+            startActivity(i);
+            finish();
+        } else if (preferences != null && preferences.contains("logindoctor")) {
+            Intent i = new Intent(MessageActivity.this, DoctorViewActivity.class);
+            startActivity(i);
+            finish();
+        } else {
+            Intent i = new Intent(MessageActivity.this, LoginActivity.class);
+            startActivity(i);
+            finish();
+        }
+
+    }
+
+    private boolean checkPermissions(){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            return true;
+        }
+        return false;
+    }
+
+    private void requestNewLocationData(){
+
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(0);
+        mLocationRequest.setFastestInterval(0);
+        mLocationRequest.setNumUpdates(1);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest, mLocationCallback,
+                Looper.myLooper()
+        );
+
+    }
+
+    private LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            Location mLastLocation = locationResult.getLastLocation();
+            //latTextView.setText(mLastLocation.getLatitude()+"");
+            //lonTextView.setText(mLastLocation.getLongitude()+"");
+        }
+    };
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_ID
+        );
+    }
+
+    private boolean isLocationEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+                LocationManager.NETWORK_PROVIDER
+        );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_ID) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getLastLocation();
+            }
+        }
+    }
+
+
+    private void getLastLocation(){
+        if (checkPermissions()) {
+            if (isLocationEnabled()) {
+                mFusedLocationClient.getLastLocation().addOnCompleteListener(
+                        new OnCompleteListener<Location>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Location> task) {
+                                Location location = task.getResult();
+                                if (location == null) {
+                                    requestNewLocationData();
+                                } else {
+                                    //latTextView.setText(location.getLatitude()+"");
+                                    //lonTextView.setText(location.getLongitude()+"");
+                                }
+                            }
+                        }
+                );
+            } else {
+                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        } else {
+            requestPermissions();
+        }
+    }
 }

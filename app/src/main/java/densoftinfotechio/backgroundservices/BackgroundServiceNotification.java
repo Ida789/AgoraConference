@@ -74,7 +74,7 @@ public class BackgroundServiceNotification extends Service {
     }
 
 
-    private void send_notification(String Id, String channel, String date, String sessiontype, int flag) {
+    private void send_notification(int Id, int channel, String date, String sessiontype, int flag) {
         /*Intent intent = new Intent(this, SplashActivity.class);
         intent.putExtra("fromNotification", "book_ride");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);*/
@@ -156,21 +156,21 @@ public class BackgroundServiceNotification extends Service {
         if (preferences != null && preferences.contains("logindoctor")) {
             Log.d("Background Service ", "doctor");
 
-            databaseReference.child("DoctorList").child("doctor" + preferences.getString("id", "")).addValueEventListener(new ValueEventListener() {
+            databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
                         for (final DataSnapshot patients : dataSnapshot.getChildren()) {
-                            databaseReference.child("DoctorList").child("doctor" + preferences.getString("id", "")).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (final DataSnapshot patient_list : dataSnapshot.getChildren()) {
-                                        databaseReference.child("DoctorList").child("doctor" + preferences.getString("id", "")).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                 if (dataSnapshot.exists()) {
                                                     PatientModel patientModel = dataSnapshot.getValue(PatientModel.class);
-                                                    if (patientModel != null && patientModel.getInitiateCall().trim().equalsIgnoreCase("1")) {
+                                                    if (patientModel != null && patientModel.getInitiateCall() == 1) {
                                                         Log.d("Call initiated ", " in Background " + Constants.callinitiatedInActivity);
                                                         if (Constants.callinitiatedInActivity != 1) {
                                                             send_notification(patientModel.getPatientId(), patientModel.getChannel(), patientModel.getDate(), patientModel.getSessionType(), 0);
@@ -203,21 +203,21 @@ public class BackgroundServiceNotification extends Service {
             });
         } else if (preferences != null && preferences.contains("loginpatient")) {
             Log.d("Background Service ", "patient");
-            databaseReference.child("PatientList").child(preferences.getString("id", "")).addValueEventListener(new ValueEventListener() {
+            databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
                         for (final DataSnapshot patients : dataSnapshot.getChildren()) {
-                            databaseReference.child("PatientList").child(preferences.getString("id", "")).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (final DataSnapshot patient_list : dataSnapshot.getChildren()) {
-                                        databaseReference.child("PatientList").child(preferences.getString("id", "")).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                 if (dataSnapshot.exists()) {
                                                     DoctorModel doctorModel = dataSnapshot.getValue(DoctorModel.class);
-                                                    if (doctorModel != null && doctorModel.getInitiateCall().trim().equalsIgnoreCase("1")) {
+                                                    if (doctorModel != null && doctorModel.getInitiateCall() == 1) {
                                                         Log.d("Call initiated ", " in Background " + Constants.callinitiatedInActivity);
                                                         if (Constants.callinitiatedInActivity != 1) {
                                                             send_notification(doctorModel.getDoctorId(), doctorModel.getChannel(), doctorModel.getDate(), doctorModel.getSessionType(), 1);

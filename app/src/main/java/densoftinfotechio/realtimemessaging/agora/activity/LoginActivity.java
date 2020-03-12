@@ -65,7 +65,7 @@ public class LoginActivity extends Activity {
     /**
      * API CALL: login RTM server
      */
-    private void doLogin(final String friendname, final String accountname) {
+    private void doLogin(final int friendname, final int accountname) {
         mIsInChat = true;
         mRtmClient.login(null, mUserId, new ResultCallback<Void>() {
             @Override
@@ -79,6 +79,7 @@ public class LoginActivity extends Activity {
                         intent.putExtra("friendname", friendname);
                         intent.putExtra("accountname", accountname);
                         startActivity(intent);
+                        finish();
                     }
                 });
             }
@@ -107,9 +108,11 @@ public class LoginActivity extends Activity {
     }
 
     private void onLogin(){
+
         if(b!=null && b.containsKey("accountname") && b.containsKey("friendname")){
-            mUserIdEditText.setText(b.getString("accountname"));
+            mUserIdEditText.setText(String.valueOf(b.getInt("accountname",0)));
             mUserId = mUserIdEditText.getText().toString();
+            Log.d("here flow ", "part 4 LoginActivity " + " user id " + b.getInt("accountname",0));
             if (mUserId.equals("")) {
                 showToast(getString(R.string.account_empty));
             } else if (mUserId.length() > MessageUtil.MAX_INPUT_NAME_LENGTH) {
@@ -120,7 +123,7 @@ public class LoginActivity extends Activity {
                 showToast(getString(R.string.account_literal_null));
             } else {
                 mLoginBtn.setEnabled(false);
-                doLogin(b.getString("friendname"), b.getString("accountname"));
+                doLogin(b.getInt("friendname",0), b.getInt("accountname",0));
             }
         }
     }

@@ -125,7 +125,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_above="@+id/bottom_container"
-                    android:layout_marginBottom="@dimen/padd_10">
+                    android:layout_marginBottom="@dimen/padd_10"
+                    android:visibility="gone">
 
                     <TextView
                         android:id="@+id/tv_time"

@@ -53,17 +53,18 @@ public class LoginActivity extends AppCompatActivity {
         tv_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //testing purpose - id from 2000-4000 are doctorIds and remaining are for patients
                 if (!et_id.getText().toString().trim().equals("")) {
                     if (Integer.parseInt(et_id.getText().toString()) >= 2000 && Integer.parseInt(et_id.getText().toString()) <= 4000) {
                         edit.putBoolean("logindoctor", true);
-                        edit.putString("id", et_id.getText().toString());
+                        edit.putInt("id", Integer.parseInt(et_id.getText().toString()));
                         edit.apply();
                         Intent i = new Intent(LoginActivity.this, DoctorViewActivity.class);
                         startActivity(i);
                         finish();
                     } else {
                         edit.putBoolean("loginpatient", true);
-                        edit.putString("id", et_id.getText().toString());
+                        edit.putInt("id", Integer.parseInt(et_id.getText().toString()));
                         edit.apply();
                         Intent i = new Intent(LoginActivity.this, PatientViewActivity.class);
                         startActivity(i);
@@ -172,9 +173,9 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (data_replace.split("&").length > 1) {
                             Intent i = new Intent(LoginActivity.this, WaitingActivity.class);
-                            i.putExtra("channelname", data_replace.split("&")[0]);
+                            i.putExtra("channelname", Integer.parseInt(data_replace.split("&")[0]));
                             i.putExtra("type", data_replace.split("&")[1]);
-                            i.putExtra("doctor", "3000");
+                            i.putExtra("doctor", 3000);
                             startActivity(i);
                             finish();
                         }

@@ -94,7 +94,7 @@ public class AddEventActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (validate()) {
                     if (preferences != null && preferences.contains("id")) {
-                        add_event_to_firebase(preferences.getString("id", ""), et_event_date.getText().toString(),
+                        add_event_to_firebase(preferences.getInt("id", 0), et_event_date.getText().toString(),
                                 et_fromtime.getText().toString().replace(" AM", "").replace(" PM", ""));
                     }
                 }
@@ -155,8 +155,8 @@ public class AddEventActivity extends AppCompatActivity {
         timePickerDialog.show();
     }
 
-    private void add_event_to_firebase(final String doctorid, final String event_date, final String event_time) {
-        databaseReference.child("Events").child(doctorid).child(event_date).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void add_event_to_firebase(final int doctorid, final String event_date, final String event_time) {
+        databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> event_param = new HashMap<>();
@@ -169,10 +169,10 @@ public class AddEventActivity extends AppCompatActivity {
                 event_param.put("DoctorId", doctorid);
 
                 if (!dataSnapshot.exists()) {
-                    databaseReference.child("Events").child(doctorid).child(event_date).child(event_time).setValue(event_param);
+                    databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).child(event_time).setValue(event_param);
                     Toast.makeText(getApplicationContext(), "Event Added", Toast.LENGTH_SHORT).show();
                 } else {
-                    databaseReference.child("Events").child(doctorid).child(event_date).child(event_time).updateChildren(event_param);
+                    databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).child(event_time).updateChildren(event_param);
                     Toast.makeText(getApplicationContext(), "Event Updated", Toast.LENGTH_SHORT).show();
 
                 }

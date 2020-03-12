@@ -47,35 +47,35 @@ public class PatientViewAdapter extends RecyclerView.Adapter<PatientViewAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
         holder.tv_date.setText(doctorModels.get(position).getDate());
         holder.tv_time.setText(doctorModels.get(position).getSessionTime());
-        holder.tv_doctor.setText(doctorModels.get(position).getDoctorId());
+        holder.tv_doctor.setText(String.valueOf(doctorModels.get(position).getDoctorId()));
 
         /*if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Video")){
             holder.tv_status.setBackground(context.getResources().getDrawable(R.drawable.video_call));
         }*/
 
-
-        if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Text") && doctorModels.get(position).getInitiateCall().equalsIgnoreCase("0")){
+        Log.d("call value ", doctorModels.get(position).getSessionType() + " " + doctorModels.get(position).getInitiateCall());
+        if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Text") && (doctorModels.get(position).getInitiateCall() == 0)){
             holder.tv_status.setText("Start a Chat");
             holder.tv_status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.text_chat, 0);
             //holder.tv_status.setBackground(context.getResources().getDrawable(R.drawable.text_chat));
-        }else if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Audio") && doctorModels.get(position).getInitiateCall().equalsIgnoreCase("0")){
+        }else if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Audio") && (doctorModels.get(position).getInitiateCall() == 0)){
             holder.tv_status.setText("Make an Audio call");
             holder.tv_status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.call_audio, 0);
             //holder.tv_status.setBackground(context.getResources().getDrawable(R.drawable.call_audio));
-        }else if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Video") && doctorModels.get(position).getInitiateCall().equalsIgnoreCase("0")){
+        }else if(doctorModels.get(position).getSessionType().equalsIgnoreCase("Video") && (doctorModels.get(position).getInitiateCall() == 0)){
             holder.tv_status.setText("Make a Video Call");
             holder.tv_status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.video_call, 0);
             //holder.tv_status.setBackground(context.getResources().getDrawable(R.drawable.video_call));
         }
 
-        if(doctorModels.get(position).getInitiateCall().equalsIgnoreCase("1")){
+        if(doctorModels.get(position).getInitiateCall() == 1){
             holder.tv_status.setText("Calling");
             holder.tv_status.setEnabled(false);
-        }else if(doctorModels.get(position).getInitiateCall().equalsIgnoreCase("2")){
+        }else if(doctorModels.get(position).getInitiateCall() == 2){
             holder.tv_status.setText("Call Completed");
             holder.tv_status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.accept, 0);
             holder.tv_status.setEnabled(false);
-        }else if(doctorModels.get(position).getInitiateCall().equalsIgnoreCase("3")){
+        }else if(doctorModels.get(position).getInitiateCall() == 3){
             holder.tv_status.setText("Call Rejected");
             holder.tv_status.setTextColor(context.getResources().getColor(R.color.red));
             holder.tv_status.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.reject, 0);
@@ -88,8 +88,7 @@ public class PatientViewAdapter extends RecyclerView.Adapter<PatientViewAdapter.
             @Override
             public void onClick(View view) {
 
-                ((PatientViewActivity)context).gotoCall(doctorModels.get(position).getDoctorId(), doctorModels.get(position).getDate(), doctorModels.get(position).getPatientId(),
-                        doctorModels.get(position).getChannel(), doctorModels.get(position).getSessionType());
+                ((PatientViewActivity)context).gotoCall(doctorModels.get(position));
             }
         });
     }

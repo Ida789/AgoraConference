@@ -84,6 +84,7 @@
            android:background="@drawable/icon_msg_r"
            android:layout_centerVertical="true"
            android:visibility="gone"/>
+
    </RelativeLayout>
 
 

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -136,7 +137,7 @@ public class MainActivity extends BaseActivity {
         mTopicEdit = findViewById(R.id.topic_edit);
         Bundle b = getIntent().getExtras();
         if(b!=null && b.containsKey("channelname")) {
-            mTopicEdit.setText(b.getString("channelname").replace("-", "").trim());
+            mTopicEdit.setText(String.valueOf(b.getInt("channelname", 0)));
             checkPermission();
         }else{
             Toast.makeText(MainActivity.this, "Please try in a while.", Toast.LENGTH_SHORT).show();
@@ -252,7 +253,7 @@ public class MainActivity extends BaseActivity {
             Intent intent = new Intent(MainActivity.this, RoleActivity.class);
             String room = mTopicEdit.getText().toString();
             config().setChannelName(room);
-            intent.putExtra("channelname", b.getString("channelname"));
+            intent.putExtra("channelname", b.getInt("channelname", 0));
             intent.putExtra("type", b.getString("type")); //channelname and type for DeepLink flow
             startActivity(intent);
             finish();
@@ -260,7 +261,8 @@ public class MainActivity extends BaseActivity {
             Intent intent = new Intent(MainActivity.this, RoleActivity.class);
             String room = mTopicEdit.getText().toString();
             config().setChannelName(room);
-            intent.putExtra("channelname", b.getString("channelname")); //Normal flow
+            Log.d("here flow ", "part 1 Main Activity");
+            intent.putExtra("channelname", b.getInt("channelname", 0)); //Normal flow
             startActivity(intent);
             finish();
         }

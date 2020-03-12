@@ -146,16 +146,16 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
     }
 
     private void firebase_update_startevent(final int pos) {
-        databaseReference.child("Events").child(eventsModels.get(pos).getDoctorId()).child(eventsModels.get(pos).getEventDate())
+        databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                 .child(eventsModels.get(pos).getFromTime()).child("Co-Host").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> param_update = new HashMap<>();
-                param_update.put("StartEvent", "1");
+                param_update.put("StartEvent", 1);
                 if (dataSnapshot.exists()) {
 
                     for (DataSnapshot user_requests : dataSnapshot.getChildren()) {
-                        databaseReference.child("Events").child(eventsModels.get(pos).getDoctorId()).child(eventsModels.get(pos).getEventDate())
+                        databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                                 .child(eventsModels.get(pos).getFromTime()).child("Co-Host").child(user_requests.getKey()).updateChildren(param_update);
                     }
                 }
@@ -167,17 +167,17 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
             }
         });
 
-        databaseReference.child("Events").child(eventsModels.get(pos).getDoctorId()).child(eventsModels.get(pos).getEventDate())
+        databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                 .child(eventsModels.get(pos).getFromTime()).child("Audience").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> param_update = new HashMap<>();
-                param_update.put("StartEvent", "1");
-                param_update.put("Status", "2"); //audience
+                param_update.put("StartEvent", 1);
+                param_update.put("Status", 2); //audience
                 if (dataSnapshot.exists()) {
 
                     for (DataSnapshot user_requests : dataSnapshot.getChildren()) {
-                        databaseReference.child("Events").child(eventsModels.get(pos).getDoctorId()).child(eventsModels.get(pos).getEventDate())
+                        databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                                 .child(eventsModels.get(pos).getFromTime()).child("Audience").child(user_requests.getKey()).updateChildren(param_update);
                     }
                 }

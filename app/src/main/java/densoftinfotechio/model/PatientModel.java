@@ -1,32 +1,41 @@
 package densoftinfotechio.model;
 
 public class PatientModel {
-    String PatientId = "";
-    String Channel = "";
-    String Date = "";
-    String Day = "";
-    String DoctorId = "";
-    String SessionTime = "";
-    String SessionType = "";
-    String InitiateCall = "";
-    String Talktime = "";
+    private int AppointmentId = 0;
+    private int PatientId = 0;
+    private int Channel = 0;
+    private String Date = "";
+    private String Day = "";
+    private int DoctorId = 0;
+    private String SessionTime = "";
+    private String SessionType = "";
+    private int InitiateCall = 0;
+    private String Talktime = "";
 
     public PatientModel() {
     }
 
-    public String getPatientId() {
+    public int getAppointmentId() {
+        return AppointmentId;
+    }
+
+    public void setAppointmentId(int appointmentId) {
+        AppointmentId = appointmentId;
+    }
+
+    public int getPatientId() {
         return PatientId;
     }
 
-    public void setPatientId(String patientId) {
+    public void setPatientId(int patientId) {
         PatientId = patientId;
     }
 
-    public String getChannel() {
+    public int getChannel() {
         return Channel;
     }
 
-    public void setChannel(String channel) {
+    public void setChannel(int channel) {
         Channel = channel;
     }
 
@@ -46,11 +55,11 @@ public class PatientModel {
         Day = day;
     }
 
-    public String getDoctorId() {
+    public int getDoctorId() {
         return DoctorId;
     }
 
-    public void setDoctorId(String doctorId) {
+    public void setDoctorId(int doctorId) {
         DoctorId = doctorId;
     }
 
@@ -70,19 +79,19 @@ public class PatientModel {
         SessionType = sessionType;
     }
 
+    public int getInitiateCall() {
+        return InitiateCall;
+    }
+
+    public void setInitiateCall(int initiateCall) {
+        InitiateCall = initiateCall;
+    }
+
     public String getTalktime() {
         return Talktime;
     }
 
     public void setTalktime(String talktime) {
         Talktime = talktime;
-    }
-
-    public String getInitiateCall() {
-        return InitiateCall;
-    }
-
-    public void setInitiateCall(String initiateCall) {
-        InitiateCall = initiateCall;
     }
 }

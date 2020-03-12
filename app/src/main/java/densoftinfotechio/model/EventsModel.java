@@ -4,23 +4,23 @@ import androidx.annotation.NonNull;
 
 public class EventsModel {
 
-    private String DoctorId = "";
+    private int DoctorId = 0;
     private String EventDate = "";
-    private String EventId = "";
+    private int EventId = 0;
     private String EventName = "";
     private String FromTime = "";
     private String TotalTime = "";
-    private String ExpectedAudience = "";
+    private long ExpectedAudience = 0;
 
     public EventsModel(){
 
     }
 
-    public String getDoctorId() {
+    public int getDoctorId() {
         return DoctorId;
     }
 
-    public void setDoctorId(String doctorId) {
+    public void setDoctorId(int doctorId) {
         DoctorId = doctorId;
     }
 
@@ -32,11 +32,11 @@ public class EventsModel {
         EventDate = eventDate;
     }
 
-    public String getEventId() {
+    public int getEventId() {
         return EventId;
     }
 
-    public void setEventId(String eventId) {
+    public void setEventId(int eventId) {
         EventId = eventId;
     }
 
@@ -64,11 +64,11 @@ public class EventsModel {
         TotalTime = totalTime;
     }
 
-    public String getExpectedAudience() {
+    public long getExpectedAudience() {
         return ExpectedAudience;
     }
 
-    public void setExpectedAudience(String expectedAudience) {
+    public void setExpectedAudience(long expectedAudience) {
         ExpectedAudience = expectedAudience;
     }
 

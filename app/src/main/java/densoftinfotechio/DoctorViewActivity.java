@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,16 +69,16 @@ public class DoctorViewActivity extends AppCompatActivity {
         rb_timing = findViewById(R.id.rb_timing);
         spinner = findViewById(R.id.spinner);
 
-        layoutManager = new LinearLayoutManager(DoctorViewActivity.this);
+        layoutManager = new LinearLayoutManager(DoctorViewActivity.this, LinearLayoutManager.VERTICAL, true);
         recyclerview_doctor.setLayoutManager(layoutManager);
         rb_timing.setChecked(true);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(DoctorViewActivity.this);
         edit = preferences.edit();
         if (preferences != null && preferences.contains("id")) {
-            et_doctor_id.setText(preferences.getString("id", ""));
+            et_doctor_id.setText(String.valueOf(preferences.getInt("id", 0)));
 
-            delete_this_method();
+            //delete_this_method();
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
@@ -85,17 +86,17 @@ public class DoctorViewActivity extends AppCompatActivity {
         //days_selectadapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spinner.setAdapter(days_selectadapter);
 
-        databaseReference.child("DoctorList").child(preferences.getString("id", "")).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (final DataSnapshot patients : dataSnapshot.getChildren()) {
-                        databaseReference.child("DoctorList").child(preferences.getString("id", "")).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 for (final DataSnapshot patient_list : dataSnapshot.getChildren()) {
                                     patientModels.clear();
-                                    databaseReference.child("DoctorList").child(preferences.getString("id", "")).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                             if (dataSnapshot.exists()) {
@@ -135,16 +136,23 @@ public class DoctorViewActivity extends AppCompatActivity {
 
     }
 
-    public void gotoCall(final String doctor, final String date, final String patient, final String channel, final String sessionType) {
-        databaseReference.child("DoctorList").child(doctor).child(date).child(patient).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void gotoCall(final int doctor, final String date, final int patient, final int channel, final String sessionType) {
+        databaseReference.child("DoctorList").child(String.valueOf(doctor)).child(date).child(String.valueOf(patient)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
 
                     HashMap<String, Object> paramupdate = new HashMap<>();
-                    paramupdate.put("InitiateCall", "1");
+                    paramupdate.put("InitiateCall", 1);
                     //databaseReference.child("Appointments").child("doctor"+doctor).child(date).child(patient).updateChildren(paramupdate);
-                    databaseReference.child("PatientList").child(patient).child(date).child(doctor).updateChildren(paramupdate);
+                    databaseReference.child("PatientList").child(String.valueOf(patient)).child(date).child(String.valueOf(doctor)).updateChildren(paramupdate);
+
+
+
+
+                    Constants.doctorId = doctor;
+                    Constants.patientId = patient;
+                    Log.d("call value sent ", Constants.doctorId + " " + Constants.patientId);
 
                     if (sessionType.equalsIgnoreCase("Video")) {
                         Intent i = new Intent(DoctorViewActivity.this, MainActivity.class);
@@ -157,10 +165,13 @@ public class DoctorViewActivity extends AppCompatActivity {
                         Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                         i.putExtra("channelname", channel);
                         startActivity(i);
-                    } else {
-                       /*Intent i = new Intent(DoctorViewActivity.this, MainActivity.class);
-                        i.putExtra("channelname", channel);
-                        startActivity(i);*/
+                        finish();
+                    } else if(sessionType.equalsIgnoreCase("Text")){
+                        Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
+                        i.putExtra("accountname", doctor);
+                        i.putExtra("friendname", patient);
+                        startActivity(i);
+                        finish();
                     }
                 }
             }
@@ -175,23 +186,25 @@ public class DoctorViewActivity extends AppCompatActivity {
 
     private void show_call() {
 
-        databaseReference.child("DoctorList").child(preferences.getString("id", "")).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (final DataSnapshot patients : dataSnapshot.getChildren()) {
-                        databaseReference.child("DoctorList").child(preferences.getString("id", "")).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 for (final DataSnapshot patient_list : dataSnapshot.getChildren()) {
 
-                                    databaseReference.child("DoctorList").child(preferences.getString("id", "")).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                             if (dataSnapshot.exists()) {
                                                 PatientModel patientModel = dataSnapshot.getValue(PatientModel.class);
                                                 if (patientModel != null) {
-                                                    if (patientModel.getInitiateCall().trim().equals("1")) {
+                                                    if (patientModel.getInitiateCall() == 1) {
+                                                        Constants.doctorId = patientModel.getDoctorId();
+                                                        Constants.patientId = patientModel.getPatientId();
                                                         Log.d("DoctorView ", " Activity called");
                                                         //stopService(new Intent(DoctorViewActivity.this, BackgroundServiceNotification.class));
                                                         Intent i = new Intent(DoctorViewActivity.this, CallingActivity.class);
@@ -286,9 +299,10 @@ public class DoctorViewActivity extends AppCompatActivity {
     }
     private void delete_this_method() {
         Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
-        i.putExtra("accountname", preferences.getString("id",""));
-        i.putExtra("friendname", "111");
+        i.putExtra("accountname", preferences.getInt("id", 0));
+        i.putExtra("friendname", 111);
         startActivity(i);
+        finish();
     }
 
 }

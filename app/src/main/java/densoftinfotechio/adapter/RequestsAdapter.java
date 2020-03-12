@@ -35,9 +35,9 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         holder.tv_patientid.setText(requestsModels.get(position).getPatientId());
 
-        if(requestsModels.get(position).getStatus().equalsIgnoreCase("1")){
+        if(requestsModels.get(position).getStatus() == 1){
             accepted(holder);
-        }else if(requestsModels.get(position).getStatus().equalsIgnoreCase("2")){
+        }else if(requestsModels.get(position).getStatus() == 2){
             denied(holder);
         }
         holder.tv_accept.setOnClickListener(new View.OnClickListener() {

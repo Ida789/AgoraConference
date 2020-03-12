@@ -131,6 +131,7 @@ public class SelectionActivity extends Activity {
         intent.putExtra("accountname", accountname);
         intent.putExtra("friendname", friendname);
         startActivityForResult(intent, CHAT_REQUEST_CODE);
+        finish();
     }
 
     @Override

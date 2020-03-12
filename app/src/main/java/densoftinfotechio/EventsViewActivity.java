@@ -61,19 +61,19 @@ public class EventsViewActivity extends AppCompatActivity {
     }
 
     private void get_events() {
-        databaseReference.child("Events").child(preferences.getString("id", "")).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 eventsModels.clear();
                 if(dataSnapshot.exists()){
                     for(final DataSnapshot events: dataSnapshot.getChildren()){
-                        databaseReference.child("Events").child(preferences.getString("id", "")).child(events.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(events.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if(dataSnapshot.exists()){
 
                                     for(DataSnapshot eventstime: dataSnapshot.getChildren()) {
-                                        databaseReference.child("Events").child(preferences.getString("id", "")).child(events.getKey())
+                                        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(events.getKey())
                                                 .child(eventstime.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

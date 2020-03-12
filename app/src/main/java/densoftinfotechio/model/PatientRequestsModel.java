@@ -1,36 +1,46 @@
 package densoftinfotechio.model;
 
 public class PatientRequestsModel {
-    private String PatientId = "";
-    private String Status = "";
-    private String StartEvent = "";
+
+    private int EventId = 0;
+    private int PatientId = 0;
+    private int Status = 0;
+    private int StartEvent = 0;
     private String Type = "";
 
     public PatientRequestsModel(){
 
     }
 
-    public String getPatientId() {
+    public int getEventId() {
+        return EventId;
+    }
+
+    public void setEventId(int eventId) {
+        EventId = eventId;
+    }
+
+    public int getPatientId() {
         return PatientId;
     }
 
-    public void setPatientId(String patientId) {
+    public void setPatientId(int patientId) {
         PatientId = patientId;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return Status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         Status = status;
     }
 
-    public String getStartEvent() {
+    public int getStartEvent() {
         return StartEvent;
     }
 
-    public void setStartEvent(String startEvent) {
+    public void setStartEvent(int startEvent) {
         StartEvent = startEvent;
     }
 

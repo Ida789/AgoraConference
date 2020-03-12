@@ -40,7 +40,7 @@ public class WaitingActivity extends AppCompatActivity {
     Bundle b;
     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
     SimpleDateFormat sdftime = new SimpleDateFormat("HH:mm");
-    String test_time = "17:45";
+    String test_time = "12:08";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,37 +56,38 @@ public class WaitingActivity extends AppCompatActivity {
         b = getIntent().getExtras();
 
         if (b != null && b.containsKey("channelname") && b.containsKey("type") && preferences != null && preferences.contains("id")) {
-            databaseReference.child("Events").child(b.getString("doctor", "")).child(sdf.format(Calendar.getInstance().getTime()))
+            databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(sdf.format(Calendar.getInstance().getTime()))
                     .child(test_time).child(b.getString("type", "Audience"))
-                    .child(preferences.getString("id", "")).addValueEventListener(new ValueEventListener() {
+                    .child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (!dataSnapshot.exists()/* && test_time.equalsIgnoreCase(sdftime.format(Calendar.getInstance().getTime()))*/) {
                         fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
                         tv_loading.startAnimation(fade_animation);
                         HashMap<String, Object> param = new HashMap<>();
-                        param.put("PatientId", preferences.getString("id", ""));
-                        param.put("Status", "0");
-                        param.put("StartEvent", "0");
+                        param.put("EventId", preferences.getInt("id", 0));
+                        param.put("PatientId", preferences.getInt("id", 0));
+                        param.put("Status", 0);
+                        param.put("StartEvent", 0);
                         param.put("Type", b.getString("type", "Audience"));
-                        databaseReference.child("Events").child(b.getString("doctor", ""))
+                        databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
                                 .child(sdf.format(Calendar.getInstance().getTime())).child(test_time/*sdftime.format(Calendar.getInstance().getTime())*/)
-                                .child(b.getString("type", "Audience")).child(preferences.getString("id", "")).setValue(param);
+                                .child(b.getString("type", "Audience")).child(String.valueOf(preferences.getInt("id", 0))).setValue(param);
                     } else {
                         PatientRequestsModel requestsModel = dataSnapshot.getValue(PatientRequestsModel.class);
 
                         if (requestsModel != null) {
-                            if (requestsModel.getStartEvent().equalsIgnoreCase("1")) {
-                                if (requestsModel.getStatus().equalsIgnoreCase("1")
+                            if (requestsModel.getStartEvent() == 1) {
+                                if (requestsModel.getStatus() == 1
                                         && requestsModel.getType().equalsIgnoreCase("Co-Host")) {
                                     Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                                    i.putExtra("channelname", b.getString("channelname", ""));
+                                    i.putExtra("channelname", b.getInt("channelname", 0));
                                     i.putExtra("type", "Co-Host");
                                     startActivity(i);
                                     finish();
                                 } else/* if (requestsModel != null && requestsModel.getStatus().equalsIgnoreCase("2"))*/ {
                                     Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                                    i.putExtra("channelname", b.getString("channelname", ""));
+                                    i.putExtra("channelname", b.getInt("channelname", 0));
                                     i.putExtra("type", "Audience");
                                     startActivity(i);
                                     finish();
@@ -143,13 +144,13 @@ public class WaitingActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     if (role_type.equalsIgnoreCase("Co-Host")) {
                         Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                        i.putExtra("channelname", b.getString("channelname", ""));
+                        i.putExtra("channelname", b.getInt("channelname", 0));
                         i.putExtra("type", "Co-Host");
                         startActivity(i);
                         finish();
                     } else {
                         Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                        i.putExtra("channelname", b.getString("channelname", ""));
+                        i.putExtra("channelname", b.getInt("channelname", 0));
                         i.putExtra("type", "Audience");
                         startActivity(i);
                         finish();
