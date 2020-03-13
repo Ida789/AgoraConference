@@ -44,8 +44,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
                 /*for (int i = 0; i < Constants.uris.size(); i++) {
                     Log.d("images ", Constants.uris.get(i) + "");
-                }
-                Log.d("size ", Constants.uris.size() + "");*/
+                }*/
+                Log.d("size ", Constants.uris.size() + "");
             }
         });
     }

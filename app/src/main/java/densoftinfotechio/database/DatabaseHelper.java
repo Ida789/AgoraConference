@@ -71,12 +71,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public JSONArray get_TABLE_CHAT(String roomname){
+    public JSONArray get_TABLE_CHAT(int roomname){
         create_TABLE_CHAT();
         JSONArray chat_list = new JSONArray();
         try{
             SQLiteDatabase db = getReadableDatabase();
-            String query = "SELECT * FROM " + TABLE_CHAT + " WHERE " + ROOM_NAME + " = " + roomname;
+            String query = "SELECT * FROM " + TABLE_CHAT + " WHERE " + ROOM_NAME + " = " + String.valueOf(roomname);
             Cursor c = db.rawQuery(query, null);
             if(c.moveToFirst()){
                 do{

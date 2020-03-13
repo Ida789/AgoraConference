@@ -164,17 +164,19 @@ public class PatientViewActivity extends AppCompatActivity {
                         Intent i = new Intent(PatientViewActivity.this, MainActivity.class);
                         i.putExtra("channelname", doctorModel.getChannel());
                         startActivity(i);
-                        finish();
+                        //finish();
 
                     } else if (doctorModel.getSessionType().equalsIgnoreCase("Audio")) {
                         Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                         i.putExtra("channelname", doctorModel.getChannel());
                         startActivity(i);
+                        //finish();
                     } else if(doctorModel.getSessionType().equalsIgnoreCase("Text")){
                         Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
                         i.putExtra("accountname", doctorModel.getPatientId());
                         i.putExtra("friendname", doctorModel.getDoctorId());
                         startActivity(i);
+                        //finish();
                     }
                 }
             }

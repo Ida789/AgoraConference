@@ -43,6 +43,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -77,10 +78,11 @@ import io.agora.rtm.RtmClientListener;
 import io.agora.rtm.RtmMessage;
 import io.agora.rtm.RtmStatusCode;
 
-//import densoftinfotechio.realtimemessaging.agora.rtmtutorial.AGApplication;
-
-//import io.agora.rtm.jni.PEER_ONLINE_STATE;
-//import io.agora.rtm.jni.PeerOnlineStatus;
+/*
+import densoftinfotechio.realtimemessaging.agora.rtmtutorial.AGApplication;
+import io.agora.rtm.jni.PEER_ONLINE_STATE;
+import io.agora.rtm.jni.PeerOnlineStatus;
+*/
 
 
 public class MessageActivity extends AppCompatActivity {
@@ -109,7 +111,7 @@ public class MessageActivity extends AppCompatActivity {
     private Uri filePath;
     private SharedPreferences preferences;
     Bundle b;
-    String accountname = "", friendname = "";
+    int accountname = 0, friendname = 0;
     String msg = "";
     String imageEncoded;
     List<String> imagesEncodedList;
@@ -139,8 +141,8 @@ public class MessageActivity extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(MessageActivity.this);
         b = getIntent().getExtras();
         if (b != null && b.containsKey("accountname") && b.containsKey("friendname")) {
-            accountname = b.getString("accountname");
-            friendname = b.getString("friendname");
+            accountname = b.getInt("accountname");
+            friendname = b.getInt("friendname");
 
             mMessageBeanList.clear();
 
@@ -228,36 +230,47 @@ public class MessageActivity extends AppCompatActivity {
 
         msg = mMsgEditText.getText().toString();
         if (mIsPeerToPeerMode) {
-            if (Constants.uris.size() > 0) {
-                recyclerview.setVisibility(View.VISIBLE);
-                for (int i = 0; i < Constants.uris.size(); i++) {
-                    BackgroundUpload backgroundUpload = new BackgroundUpload();
-                    backgroundUpload.execute(Constants.uris.get(i));
+
+            if(msg.contains("maps.google.com")){
+                send_live_location(msg.concat("~location"));
+            }else{
+                if (Constants.uris.size() > 0) {
+                    recyclerview.setVisibility(View.VISIBLE);
+                    for (int i = 0; i < Constants.uris.size(); i++) {
+                        BackgroundUpload backgroundUpload = new BackgroundUpload();
+                        backgroundUpload.execute(Constants.uris.get(i));
+                    }
+                } else if (!msg.equals("")) {
+                    MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                    mMessageBeanList.add(messageBean);
+                    mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                    mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+                    sendPeerMessage(msg);
                 }
-            } else if (!msg.equals("")) {
-                MessageBean messageBean = new MessageBean(mUserId, msg, true);
-                mMessageBeanList.add(messageBean);
-                mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
-                mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
-                sendPeerMessage(msg);
+                Constants.uris.clear();
             }
-            Constants.uris.clear();
+
+
 
         } else {
-            if (Constants.uris.size() > 0) {
-                recyclerview.setVisibility(View.VISIBLE);
-                for (int i = 0; i < Constants.uris.size(); i++) {
-                    BackgroundUpload backgroundUpload = new BackgroundUpload();
-                    backgroundUpload.execute(Constants.uris.get(i));
+            if(msg.contains("maps.google.com")){
+                send_live_location(msg.concat("~location"));
+            }else {
+                if (Constants.uris.size() > 0) {
+                    recyclerview.setVisibility(View.VISIBLE);
+                    for (int i = 0; i < Constants.uris.size(); i++) {
+                        BackgroundUpload backgroundUpload = new BackgroundUpload();
+                        backgroundUpload.execute(Constants.uris.get(i));
+                    }
+                } else if (!msg.equals("")) {
+                    MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                    mMessageBeanList.add(messageBean);
+                    mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+                    mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+                    sendChannelMessage(msg);
                 }
-            } else if (!msg.equals("")) {
-                MessageBean messageBean = new MessageBean(mUserId, msg, true);
-                mMessageBeanList.add(messageBean);
-                mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
-                mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
-                sendChannelMessage(msg);
+                Constants.uris.clear();
             }
-            Constants.uris.clear();
 
 
         }
@@ -357,6 +370,8 @@ public class MessageActivity extends AppCompatActivity {
                 if(checkPermissions()){
                     mFusedLocationClient = LocationServices.getFusedLocationProviderClient(MessageActivity.this);
                     getLastLocation();
+                }else{
+                    requestPermissions();
                 }
             }
         });
@@ -457,13 +472,13 @@ public class MessageActivity extends AppCompatActivity {
     private void saveChat_in_sqlite(String content, String mPeerId, boolean beSelf) {
         try {
             JSONObject messagebean = new JSONObject();
-            messagebean.put("account", preferences.getString("id", ""));
+            messagebean.put("account", preferences.getInt("id", 0));
             messagebean.put("message", content);
             messagebean.put("beSelf", beSelf);
 
             ContentValues c = new ContentValues();
             c.put(DatabaseHelper.JSON_CHAT, messagebean.toString());
-            c.put(DatabaseHelper.ROOM_NAME, mPeerId);
+            c.put(DatabaseHelper.ROOM_NAME, String.valueOf(mPeerId));
             c.put(DatabaseHelper.CHAT_DATE, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate());
             c.put(DatabaseHelper.CHAT_TIME, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
             DatabaseHelper.getInstance(MessageActivity.this).save_TABLE_CHAT(c, mPeerId);
@@ -473,7 +488,7 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
 
-    private void getChat_from_sqlite(String roomname) {
+    private void getChat_from_sqlite(int roomname) {
         try {
 
             JSONArray array_chat = DatabaseHelper.getInstance(MessageActivity.this).get_TABLE_CHAT(roomname);
@@ -984,6 +999,9 @@ public class MessageActivity extends AppCompatActivity {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             Location mLastLocation = locationResult.getLastLocation();
+            String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?q=loc:%f,%f",
+                    mLastLocation.getLatitude(),mLastLocation.getLongitude());
+            mMsgEditText.setText("I'm here " + uri);
             //latTextView.setText(mLastLocation.getLatitude()+"");
             //lonTextView.setText(mLastLocation.getLongitude()+"");
         }
@@ -1026,6 +1044,10 @@ public class MessageActivity extends AppCompatActivity {
                                 if (location == null) {
                                     requestNewLocationData();
                                 } else {
+                                    String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?q=loc:%f,%f",
+                                            location.getLatitude(),location.getLongitude());
+                                    mMsgEditText.setText("I'm here " + uri);
+
                                     //latTextView.setText(location.getLatitude()+"");
                                     //lonTextView.setText(location.getLongitude()+"");
                                 }
@@ -1040,5 +1062,20 @@ public class MessageActivity extends AppCompatActivity {
         } else {
             requestPermissions();
         }
+    }
+
+    private void send_live_location(String uri) {
+        MessageBean messageBean = new MessageBean(mUserId, (uri), true);
+        mMessageBeanList.add(messageBean);
+        mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
+        mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
+
+        if (mIsPeerToPeerMode) {
+            sendPeerMessage((uri));
+        } else {
+            sendChannelMessage((uri));
+        }
+
+        mMsgEditText.setText("");
     }
 }

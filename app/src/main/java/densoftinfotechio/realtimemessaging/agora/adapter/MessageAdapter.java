@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,9 +64,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
         final MessageBean bean = messageBeanList.get(position);
 
-        messageurl = bean.getMessage().replace("~image", "").replace("~video", "");
+        messageurl = bean.getMessage().replace("~image", "").replace("~video", "").replace("~location", "");
 
         Log.d("message adapter ", messageurl);
+
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        builder.append("Check out my location").append(" ");
+        builder.setSpan(new ImageSpan(context, R.drawable.google_map),
+                builder.length() - 1, builder.length(), 0);
+
         if (bean.isBeSelf()) {
             holder.textViewSelfName.setText(bean.getAccount());
 
@@ -80,9 +88,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                .getMessage().replace("~image", "")
-                                .replace("~video", ""), "image");
+
+                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
+                                    .getMessage().replace("~image", "")
+                                    .replace("~video", ""), "image");
 
                         /*Intent i = new Intent();
                         i.setAction(Intent.ACTION_VIEW);
@@ -94,7 +103,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                         context.startActivity(Intent.createChooser(i, "Open With"));*/
                     }
                 });
-
 
 
             } else if (bean.getMessage().contains("~video")) {
@@ -109,13 +117,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                .getMessage().replace("~image", "")
-                                .replace("~video", ""), "video");
+                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
+                                    .getMessage().replace("~image", "")
+                                    .replace("~video", ""), "video");
                     }
                 });
 
-            } else {
+            } else if (bean.getMessage().contains("~location")) {
+
+                holder.textViewSelfMsg.setText(builder);
+                holder.iv_image_r.setVisibility(View.GONE);
+                holder.textViewSelfMsg.setVisibility(View.VISIBLE);
+                holder.textViewSelfMsg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getMessage().replace("I'm here ", "").replace("~location", "")));
+                        context.startActivity(intent);
+                    }
+                });
+
+            }else {
                 holder.textViewSelfMsg.setText(bean.getMessage());
                 holder.iv_image_r.setVisibility(View.GONE);
                 holder.textViewSelfMsg.setVisibility(View.VISIBLE);
@@ -136,9 +157,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                .getMessage().replace("~image", "")
-                                .replace("~video", ""), "image");
+
+                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
+                                    .getMessage().replace("~image", "")
+                                    .replace("~video", ""), "image");
+
+
 
                         /*Intent i = new Intent();
                         i.setAction(Intent.ACTION_VIEW);
@@ -165,12 +189,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                .getMessage().replace("~image", "")
-                                .replace("~video", ""), "video");
+
+
+                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
+                                    .getMessage().replace("~image", "")
+                                    .replace("~video", ""), "video");
+
                     }
                 });
-            } else {
+            } else if (bean.getMessage().contains("~location")) {
+                holder.textViewOtherMsg.setText(builder);
+                holder.iv_image_l.setVisibility(View.GONE);
+                holder.textViewOtherMsg.setVisibility(View.VISIBLE);
+                holder.textViewOtherMsg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getMessage().replace("I'm here ", "").replace("~location", "")));
+                        context.startActivity(intent);
+                    }
+                });
+
+            }else {
                 holder.textViewOtherMsg.setText(bean.getMessage());
                 holder.iv_image_l.setVisibility(View.GONE);
                 holder.textViewOtherMsg.setVisibility(View.VISIBLE);
@@ -225,35 +264,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             layoutRight = itemView.findViewById(R.id.item_layout_r);
             iv_image_l = itemView.findViewById(R.id.iv_image_l);
             iv_image_r = itemView.findViewById(R.id.iv_image_r);
-
         }
     }
 
-    public static Bitmap retriveVideoFrameFromVideo(String videoPath)throws Throwable
-    {
+    public static Bitmap retriveVideoFrameFromVideo(String videoPath) throws Throwable {
         Bitmap bitmap = null;
         Bitmap b = null;
         MediaMetadataRetriever mediaMetadataRetriever = null;
-        try
-        {
+        try {
             mediaMetadataRetriever = new MediaMetadataRetriever();
-           // if (Build.VERSION.SDK_INT >= 14)
-                mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
+            // if (Build.VERSION.SDK_INT >= 14)
+            mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
             /*else
                 mediaMetadataRetriever.setDataSource(videoPath);*/
             //   mediaMetadataRetriever.setDataSource(videoPath);
             bitmap = mediaMetadataRetriever.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST);
-            b = Bitmap.createScaledBitmap(bitmap,200, 150, false);
-        }
-        catch (Exception e)
-        {
+            b = Bitmap.createScaledBitmap(bitmap, 200, 150, false);
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new Throwable("Exception in retriveVideoFrameFromVideo(String videoPath)"+ e.getMessage());
-        }
-        finally
-        {
-            if (mediaMetadataRetriever != null)
-            {
+            throw new Throwable("Exception in retriveVideoFrameFromVideo(String videoPath)" + e.getMessage());
+        } finally {
+            if (mediaMetadataRetriever != null) {
                 mediaMetadataRetriever.release();
             }
         }

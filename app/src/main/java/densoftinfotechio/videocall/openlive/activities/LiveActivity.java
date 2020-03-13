@@ -16,9 +16,14 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.preference.PreferenceManager;
+import densoftinfotechio.AgoraApplication;
 import densoftinfotechio.DoctorViewActivity;
 import densoftinfotechio.PatientViewActivity;
 import densoftinfotechio.agora.openlive.R;
+import densoftinfotechio.realtimemessaging.agora.activity.LoginActivity;
+import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
+import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
+import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
 import densoftinfotechio.screenshare.app.BroadcasterActivity;
 import densoftinfotechio.videocall.openlive.stats.LocalStatsData;
 import densoftinfotechio.videocall.openlive.stats.RemoteStatsData;
@@ -27,6 +32,9 @@ import densoftinfotechio.videocall.openlive.ui.VideoGridContainer;
 import io.agora.rtc.Constants;
 import io.agora.rtc.IRtcEngineEventHandler;
 import io.agora.rtc.video.VideoEncoderConfiguration;
+import io.agora.rtm.ErrorInfo;
+import io.agora.rtm.ResultCallback;
+import io.agora.rtm.RtmClient;
 
 public class LiveActivity extends RtcBaseActivity {
     private static final String TAG = LiveActivity.class.getSimpleName();
@@ -38,6 +46,7 @@ public class LiveActivity extends RtcBaseActivity {
 
     private VideoEncoderConfiguration.VideoDimensions mVideoDimension;
     TextView tv_time;
+    private boolean mIsInChat = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -270,18 +279,20 @@ public class LiveActivity extends RtcBaseActivity {
     public void onPushStreamClicked(View view) {
         // Do nothing at the moment
 
-        Intent i = new Intent(LiveActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
+        //Intent i = new Intent(LiveActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
 
         if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
+            doLogin(densoftinfotechio.videocall.openlive.Constants.patientId, densoftinfotechio.videocall.openlive.Constants.doctorId);
             Log.d("here flow ", "part 3 Live Activity doctor");
-            i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.doctorId);
-            i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.patientId);
+            //i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.doctorId);
+            //i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.patientId);
         }else{
+            doLogin(densoftinfotechio.videocall.openlive.Constants.doctorId, densoftinfotechio.videocall.openlive.Constants.patientId);
             Log.d("here flow ", "part 3 Live Activity patient");
-            i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.patientId);
-            i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.doctorId);
+            //i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.patientId);
+            //i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.doctorId);
         }
-        startActivity(i);
+        //startActivity(i);
         finish();
 
     }
@@ -320,5 +331,40 @@ public class LiveActivity extends RtcBaseActivity {
     public void onScreenSharingClicked(View view) {
         Intent i = new Intent(LiveActivity.this, BroadcasterActivity.class);
         startActivity(i);
+    }
+    private RtmClient mRtmClient;
+
+    private void doLogin(final int friendname, final int accountname) {
+        ChatManager mChatManager = AgoraApplication.the().getChatManager();
+        mRtmClient = mChatManager.getRtmClient();
+        mIsInChat = true;
+        mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
+            @Override
+            public void onSuccess(Void responseInfo) {
+                Log.i(TAG, "login success");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(LiveActivity.this, SelectionActivity.class);
+                        intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                        intent.putExtra("friendname", friendname);
+                        intent.putExtra("accountname", accountname);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(ErrorInfo errorInfo) {
+                Log.i(TAG, "login failed: " + errorInfo.getErrorCode());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mIsInChat = false;
+                    }
+                });
+            }
+        });
     }
 }

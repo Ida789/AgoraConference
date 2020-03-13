@@ -31,6 +31,17 @@
             android:layout_centerVertical="true"
             />
 
+        <!--<ImageView
+            android:id="@+id/iv_googlemap_l"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/item_msg_l"
+            android:layout_marginRight="20dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:background="@drawable/google_map"
+            android:visibility="gone"/>-->
+
         <ImageView
             android:id="@+id/iv_image_l"
             android:layout_width="wrap_content"
@@ -72,6 +83,17 @@
            android:background="@drawable/icon_msg_r"
            android:layout_centerVertical="true"
            />
+
+       <!--<ImageView
+           android:id="@+id/iv_googlemap_r"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_toLeftOf="@+id/item_msg_r"
+           android:layout_marginRight="20dp"
+           android:gravity="center"
+           android:padding="10dp"
+           android:background="@drawable/google_map"
+           android:visibility="gone"/>-->
 
        <ImageView
            android:id="@+id/iv_image_r"

@@ -36,7 +36,7 @@ public class SelectionActivity extends Activity {
     private ChatManager mChatManager;
     private RtmClient mRtmClient;
     private Bundle b;
-    String accountname = "";
+    int accountname = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +59,8 @@ public class SelectionActivity extends Activity {
 
         b = getIntent().getExtras();
         if(b!=null && b.containsKey("friendname") && b.containsKey("accountname")){
-            mNameEditText.setText(b.getString("friendname"));
-            accountname = b.getString("accountname", "");
+            mNameEditText.setText(String.valueOf(b.getInt("friendname")));
+            accountname = b.getInt("accountname", 0);
             modeGroup.check(R.id.peer_radio_button);
         }
 
@@ -129,7 +129,7 @@ public class SelectionActivity extends Activity {
         intent.putExtra(MessageUtil.INTENT_EXTRA_TARGET_NAME, mTargetName);
         intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, mUserId);
         intent.putExtra("accountname", accountname);
-        intent.putExtra("friendname", friendname);
+        intent.putExtra("friendname", Integer.parseInt(friendname));
         startActivityForResult(intent, CHAT_REQUEST_CODE);
         finish();
     }
