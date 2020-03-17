@@ -35,5 +35,6 @@ public class Constants {
 
     public static int doctorId = 0;
     public static int patientId = 0;
+    public static int channel = 0;
 
 }

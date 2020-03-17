@@ -82,6 +82,7 @@ public class DoctorViewActivity extends AppCompatActivity {
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
+        startService(new Intent(getApplicationContext(), BackgroundServiceNotification.class));
         days_selectadapter = new ArrayAdapter(this, R.layout.spinner_layout, R.id.textview, days);
         //days_selectadapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spinner.setAdapter(days_selectadapter);
@@ -152,6 +153,7 @@ public class DoctorViewActivity extends AppCompatActivity {
 
                     Constants.doctorId = doctor;
                     Constants.patientId = patient;
+                    Constants.channel = channel;
                     Log.d("call value sent ", Constants.doctorId + " " + Constants.patientId);
 
                     if (sessionType.equalsIgnoreCase("Video")) {
@@ -205,6 +207,7 @@ public class DoctorViewActivity extends AppCompatActivity {
                                                     if (patientModel.getInitiateCall() == 1) {
                                                         Constants.doctorId = patientModel.getDoctorId();
                                                         Constants.patientId = patientModel.getPatientId();
+                                                        Constants.channel = patientModel.getChannel();
                                                         Log.d("DoctorView ", " Activity called");
                                                         //stopService(new Intent(DoctorViewActivity.this, BackgroundServiceNotification.class));
                                                         Intent i = new Intent(DoctorViewActivity.this, CallingActivity.class);

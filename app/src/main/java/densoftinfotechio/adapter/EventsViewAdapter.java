@@ -188,7 +188,7 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
 
             }
         });
-
+        densoftinfotechio.videocall.openlive.Constants.channel = eventsModels.get(pos).getEventId();
         Intent ilive = new Intent(context, MainActivity.class);
         ilive.putExtra("channelname", eventsModels.get(pos).getEventId());
         ilive.putExtra("type", "Host");

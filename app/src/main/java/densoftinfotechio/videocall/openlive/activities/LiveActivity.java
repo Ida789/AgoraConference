@@ -47,6 +47,7 @@ public class LiveActivity extends RtcBaseActivity {
     private VideoEncoderConfiguration.VideoDimensions mVideoDimension;
     TextView tv_time;
     private boolean mIsInChat = false;
+    private RtmClient mRtmClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,9 @@ public class LiveActivity extends RtcBaseActivity {
         initUI();
         tv_time = findViewById(R.id.tv_time);
         initData();
+
+        ChatManager mChatManager = AgoraApplication.the().getChatManager();
+        mRtmClient = mChatManager.getRtmClient();
 
     }
 
@@ -72,7 +76,7 @@ public class LiveActivity extends RtcBaseActivity {
         int role = getIntent().getIntExtra(
                 densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE,
                 Constants.CLIENT_ROLE_AUDIENCE);
-        boolean isBroadcaster =  (role == Constants.CLIENT_ROLE_BROADCASTER);
+        boolean isBroadcaster = (role == Constants.CLIENT_ROLE_BROADCASTER);
 
         mMuteVideoBtn = findViewById(R.id.live_btn_mute_video);
         mMuteVideoBtn.setActivated(isBroadcaster);
@@ -134,13 +138,13 @@ public class LiveActivity extends RtcBaseActivity {
     @Override
     public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
         // Do nothing at the moment
-        Log.d("agora method ",  " onJoinChannelSuccess Called " + elapsed);
+        Log.d("agora method ", " onJoinChannelSuccess Called " + elapsed);
     }
 
     @Override
     public void onUserJoined(final int uid, int elapsed) {
         // Do nothing at the moment
-        Log.d("agora method ",  " onUserJoined Called " + elapsed);
+        Log.d("agora method ", " onUserJoined Called " + elapsed);
     }
 
     @Override
@@ -149,7 +153,7 @@ public class LiveActivity extends RtcBaseActivity {
             @Override
             public void run() {
                 removeRemoteUser(uid);
-                Log.d("agora method ",  " onUserOffline Called");
+                Log.d("agora method ", " onUserOffline Called");
             }
         });
     }
@@ -249,12 +253,12 @@ public class LiveActivity extends RtcBaseActivity {
 
     public void onLeaveClicked(View view) {
 
-        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
+        if (sharedPreferences != null && sharedPreferences.contains("logindoctor")) {
             Intent i = new Intent(LiveActivity.this, DoctorViewActivity.class);
             startActivity(i);
             finish();
 
-        }else{
+        } else {
             Intent i = new Intent(LiveActivity.this, PatientViewActivity.class);
             startActivity(i);
             finish();
@@ -281,19 +285,19 @@ public class LiveActivity extends RtcBaseActivity {
 
         //Intent i = new Intent(LiveActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
 
-        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
+        if (sharedPreferences != null && sharedPreferences.contains("logindoctor")) {
             doLogin(densoftinfotechio.videocall.openlive.Constants.patientId, densoftinfotechio.videocall.openlive.Constants.doctorId);
             Log.d("here flow ", "part 3 Live Activity doctor");
             //i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.doctorId);
             //i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.patientId);
-        }else{
+        } else {
             doLogin(densoftinfotechio.videocall.openlive.Constants.doctorId, densoftinfotechio.videocall.openlive.Constants.patientId);
             Log.d("here flow ", "part 3 Live Activity patient");
             //i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.patientId);
             //i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.doctorId);
         }
         //startActivity(i);
-        finish();
+        //finish();
 
     }
 
@@ -315,28 +319,36 @@ public class LiveActivity extends RtcBaseActivity {
 
     @Override
     public void onBackPressed() {
-        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
-            Intent i = new Intent(LiveActivity.this, DoctorViewActivity.class);
-            startActivity(i);
-            finish();
-        }else{
-            Intent i = new Intent(LiveActivity.this, PatientViewActivity.class);
-            startActivity(i);
-            finish();
+        try {
+            if (sharedPreferences != null && sharedPreferences.contains("logindoctor")) {
+                Intent i = new Intent(LiveActivity.this, DoctorViewActivity.class);
+                startActivity(i);
+                finish();
+            } else {
+                Intent i = new Intent(LiveActivity.this, PatientViewActivity.class);
+                startActivity(i);
+                finish();
+            }
+            statsManager().clearAllData();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        statsManager().clearAllData();
-        super.onBackPressed();
+        try {
+            mRtmClient.logout(null);
+            MessageUtil.cleanMessageListBeanList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //super.onBackPressed();
     }
 
     public void onScreenSharingClicked(View view) {
         Intent i = new Intent(LiveActivity.this, BroadcasterActivity.class);
         startActivity(i);
     }
-    private RtmClient mRtmClient;
+
 
     private void doLogin(final int friendname, final int accountname) {
-        ChatManager mChatManager = AgoraApplication.the().getChatManager();
-        mRtmClient = mChatManager.getRtmClient();
         mIsInChat = true;
         mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
             @Override
@@ -367,4 +379,17 @@ public class LiveActivity extends RtcBaseActivity {
             }
         });
     }
+
+    private void doLogout() {
+        mRtmClient.logout(null);
+        MessageUtil.cleanMessageListBeanList();
+    }
+
+    /*@Override
+    protected void onResume() {
+        super.onResume();
+        if (mIsInChat) {
+            doLogout();
+        }
+    }*/
 }

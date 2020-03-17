@@ -262,7 +262,7 @@ public class MainActivity extends BaseActivity {
             String room = mTopicEdit.getText().toString();
             config().setChannelName(room);
             Log.d("here flow ", "part 1 Main Activity");
-            intent.putExtra("channelname", b.getInt("channelname", 0)); //Normal flow
+            intent.putExtra("channelname", b.getInt("channelname", 0)); //channel name for Normal flow
             startActivity(intent);
             finish();
         }

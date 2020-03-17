@@ -54,11 +54,8 @@ public class PatientViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_view);
 
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
-            //ContextCompat.startForegroundService(PatientViewActivity.this, new Intent(PatientViewActivity.this, BackgroundServiceNotification.class));
-        }else {
-            startService(new Intent(PatientViewActivity.this, BackgroundServiceNotification.class));
-        }
+
+
 
         et_patient_id = findViewById(R.id.et_patient_id);
         tv_search = findViewById(R.id.tv_search);
@@ -72,11 +69,11 @@ public class PatientViewActivity extends AppCompatActivity {
         edit = preferences.edit();
         if (preferences != null && preferences.contains("id")) {
             et_patient_id.setText(String.valueOf(preferences.getInt("id", 0)));
-
             //delete_this_method();
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
+        startService(new Intent(getApplicationContext(), BackgroundServiceNotification.class));
 
         databaseReference.child("PatientList").child(et_patient_id.getText().toString()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -140,7 +137,7 @@ public class PatientViewActivity extends AppCompatActivity {
 
     private void delete_this_method() {
         Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
-        i.putExtra("accountname", preferences.getInt("id",0));
+        i.putExtra("accountname", preferences.getInt("id", 0));
         i.putExtra("friendname", "3000");
         startActivity(i);
     }
@@ -158,6 +155,7 @@ public class PatientViewActivity extends AppCompatActivity {
 
                     Constants.doctorId = doctorModel.getDoctorId();
                     Constants.patientId = doctorModel.getPatientId();
+                    Constants.channel = doctorModel.getChannel();
                     Log.d("call value sent ", Constants.doctorId + " " + Constants.patientId);
 
                     if (doctorModel.getSessionType().equalsIgnoreCase("Video")) {
@@ -171,7 +169,7 @@ public class PatientViewActivity extends AppCompatActivity {
                         i.putExtra("channelname", doctorModel.getChannel());
                         startActivity(i);
                         //finish();
-                    } else if(doctorModel.getSessionType().equalsIgnoreCase("Text")){
+                    } else if (doctorModel.getSessionType().equalsIgnoreCase("Text")) {
                         Intent i = new Intent(PatientViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
                         i.putExtra("accountname", doctorModel.getPatientId());
                         i.putExtra("friendname", doctorModel.getDoctorId());
@@ -198,7 +196,7 @@ public class PatientViewActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.logout:
                 edit.clear();
                 edit.apply();
@@ -239,6 +237,7 @@ public class PatientViewActivity extends AppCompatActivity {
                                                     if (doctorModel.getInitiateCall() == 1) {
                                                         Constants.doctorId = doctorModel.getDoctorId();
                                                         Constants.patientId = doctorModel.getPatientId();
+                                                        Constants.channel = doctorModel.getChannel();
                                                         //stopService(new Intent(DoctorViewActivity.this, BackgroundServiceNotification.class));
                                                         Intent i = new Intent(PatientViewActivity.this, CallingActivity.class);
                                                         i.putExtra("doctorid", doctorModel.getDoctorId());

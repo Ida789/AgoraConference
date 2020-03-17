@@ -67,6 +67,7 @@ import densoftinfotechio.realtimemessaging.agora.model.MessageBean;
 import densoftinfotechio.realtimemessaging.agora.model.MessageListBean;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
+import densoftinfotechio.videocall.openlive.activities.LiveActivity;
 import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
 import io.agora.rtm.RtmChannel;
@@ -407,11 +408,11 @@ public class MessageActivity extends AppCompatActivity {
         }
 
         if (preferences != null && preferences.contains("loginpatient")) {
-            Intent i = new Intent(MessageActivity.this, PatientViewActivity.class);
+            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
             startActivity(i);
             finish();
         } else if (preferences != null && preferences.contains("logindoctor")) {
-            Intent i = new Intent(MessageActivity.this, DoctorViewActivity.class);
+            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
             startActivity(i);
             finish();
         } else {
@@ -948,19 +949,21 @@ public class MessageActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        try {
+        /*try {
             mRtmClient.logout(null);
             MessageUtil.cleanMessageListBeanList();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         if (preferences != null && preferences.contains("loginpatient")) {
-            Intent i = new Intent(MessageActivity.this, PatientViewActivity.class);
+            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
+            i.putExtra("channelname", densoftinfotechio.videocall.openlive.Constants.channel);
             startActivity(i);
             finish();
         } else if (preferences != null && preferences.contains("logindoctor")) {
-            Intent i = new Intent(MessageActivity.this, DoctorViewActivity.class);
+            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
+            i.putExtra("channelname", densoftinfotechio.videocall.openlive.Constants.channel);
             startActivity(i);
             finish();
         } else {

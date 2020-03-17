@@ -75,7 +75,7 @@ public class WaitingActivity extends AppCompatActivity {
                                 .child(b.getString("type", "Audience")).child(String.valueOf(preferences.getInt("id", 0))).setValue(param);
                     } else {
                         PatientRequestsModel requestsModel = dataSnapshot.getValue(PatientRequestsModel.class);
-
+                        densoftinfotechio.videocall.openlive.Constants.channel = b.getInt("channelname", 0);
                         if (requestsModel != null) {
                             if (requestsModel.getStartEvent() == 1) {
                                 if (requestsModel.getStatus() == 1
@@ -142,6 +142,7 @@ public class WaitingActivity extends AppCompatActivity {
             tv_join.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    densoftinfotechio.videocall.openlive.Constants.channel = b.getInt("channelname", 0);
                     if (role_type.equalsIgnoreCase("Co-Host")) {
                         Intent i = new Intent(WaitingActivity.this, MainActivity.class);
                         i.putExtra("channelname", b.getInt("channelname", 0));

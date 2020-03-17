@@ -6,8 +6,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
@@ -35,33 +37,32 @@ import densoftinfotechio.agora.openlive.R;
 
 public class BackgroundServiceNotification extends Service {
 
-    private NotificationManager notificationManager;
+    //private NotificationManager notificationManager;
     private SharedPreferences preferences;
     private DatabaseReference databaseReference;
+    private String channel_id = "nidhikamath";
+    //private String stop = "stop";
 
     @Override
     public void onCreate() {
 
+        //registerReceiver(stopReceiver, new IntentFilter(stop));
+        build_notification();
+
         /*Log.d("OnCreate", "Invoke background service onCreate method.");
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel("Densoft_VideoCall", "Paysmart", NotificationManager.IMPORTANCE_DEFAULT);
 
-            //Configure the notification channel
-            notificationChannel.setName("Hey");
-            notificationChannel.setDescription("yo");
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+            NotificationChannel notificationChannel = new NotificationChannel(channel_id, "OpenLive-Android", NotificationManager.IMPORTANCE_HIGH);
             notificationChannel.enableVibration(true);
-
+            notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             notificationManager.createNotificationChannel(notificationChannel);
         }
         Intent notificationIntent = new Intent(this, PatientViewActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
 
-        Notification notification = new NotificationCompat.Builder(this, "Densoft_VideoCall")
+        Notification notification = new NotificationCompat.Builder(this, channel_id)
                 .setContentTitle("Example Service")
                 .setContentText("Hey")
                 .setSmallIcon(R.drawable.ic_launcher_background)
@@ -79,9 +80,11 @@ public class BackgroundServiceNotification extends Service {
         intent.putExtra("fromNotification", "book_ride");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);*/
 
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         String title = "Incoming Call..";
         String message = "";
+
+
         Intent intentConfirm = new Intent(this, BackgroundReceiver.class);
         intentConfirm.setAction("Accept");
         intentConfirm.putExtra("channelname", channel);
@@ -110,46 +113,38 @@ public class BackgroundServiceNotification extends Service {
         //clicked by user.
         PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(this, 1, intentCancel, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel("Densoft_VideoCall", "OpenLive-Android", NotificationManager.IMPORTANCE_DEFAULT);
-
-            //Configure the notification channel
-            notificationChannel.setName(title);
-            notificationChannel.setDescription(message);
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
-            notificationChannel.enableVibration(true);
-
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "Densoft_VideoCall");
-        notificationBuilder
-                .setSmallIcon(R.drawable.icon_call)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channel_id)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setColor(Color.BLUE)
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.icon_call)
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true)
                 .addAction(R.drawable.ic_launcher_background, "Accept", pendingIntentConfirm)
-                .setContentIntent(pendingIntentCancel)
-                .build();
+                .setContentIntent(pendingIntentCancel);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(21, notificationBuilder.build());
-            Log.d("in foreground ", "notification");
-        } else {
-            notificationManager.notify(21, notificationBuilder.build());
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = notificationManager.getNotificationChannel(channel_id);
+            if (mChannel == null) {
+            mChannel = new NotificationChannel(channel_id, "OpenLive-Android", importance);
+            mChannel.enableVibration(true);
+            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+            notificationManager.createNotificationChannel(mChannel);
+            }
         }
+
+        if(notificationManager!=null) {
+            notificationManager.notify(1, builder.build());
+        }
+        //startForeground(1, builder.build());
 
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    private void build_notification() {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         databaseReference = FirebaseDatabase.getInstance().getReference("BookedAppointments");
 
@@ -220,6 +215,7 @@ public class BackgroundServiceNotification extends Service {
                                                     if (doctorModel != null && doctorModel.getInitiateCall() == 1) {
                                                         Log.d("Call initiated ", " in Background " + Constants.callinitiatedInActivity);
                                                         if (Constants.callinitiatedInActivity != 1) {
+                                                            Log.d("here ", "initial 1");
                                                             send_notification(doctorModel.getDoctorId(), doctorModel.getChannel(), doctorModel.getDate(), doctorModel.getSessionType(), 1);
                                                         }
                                                     }
@@ -251,7 +247,14 @@ public class BackgroundServiceNotification extends Service {
         } else {
             Log.d("Background Service ", "none");
         }
-        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //stopForeground(true);
+        //stopSelf();
+        Log.d("here ", "initial ");
+        return START_STICKY;
     }
 
     @Nullable
@@ -260,4 +263,5 @@ public class BackgroundServiceNotification extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }

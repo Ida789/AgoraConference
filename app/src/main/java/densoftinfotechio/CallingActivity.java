@@ -99,7 +99,7 @@ public class CallingActivity extends AppCompatActivity {
     }
 
     private void doctor_joined(final int patient_id, final int channelname, final String dateofcall, final String sessiontype) {
-
+        densoftinfotechio.videocall.openlive.Constants.channel = channelname;
         if (preferences != null && preferences.contains("id")) {
             databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -162,7 +162,7 @@ public class CallingActivity extends AppCompatActivity {
     }
 
     private void patient_joined(final int doctorid, final int channelname, final String dateofcall, final String sessiontype) {
-
+        densoftinfotechio.videocall.openlive.Constants.channel = channelname;
         if (preferences != null && preferences.contains("id")) {
             databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
