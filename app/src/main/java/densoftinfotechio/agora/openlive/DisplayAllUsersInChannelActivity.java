@@ -11,5 +11,6 @@ public class DisplayAllUsersInChannelActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_all_users_in_channel);
+        //commit changes
     }
 }
