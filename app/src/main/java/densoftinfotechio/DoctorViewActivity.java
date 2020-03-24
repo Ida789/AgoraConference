@@ -288,7 +288,7 @@ public class DoctorViewActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
 
-        Log.d("calling activity", " running");
+        Log.d("calling activity", " running in main");
         Constants.callinitiatedInActivity = 1;
         show_call();
 

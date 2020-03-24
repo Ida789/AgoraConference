@@ -82,6 +82,7 @@ public class AddEventActivity extends AppCompatActivity {
             }
         });
 
+
         /*et_totime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,7 +126,6 @@ public class AddEventActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Please enter the expected audience to attend the event", Toast.LENGTH_SHORT).show();
             return false;
         }
-
         return true;
 
     }

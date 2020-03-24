@@ -20,7 +20,8 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
-        <activity android:name="densoftinfotechio.GalleryItemsActivity"></activity>
+        <activity android:name=".DisplayAllUsersInChannelActivity"></activity>
+        <activity android:name="densoftinfotechio.GalleryItemsActivity" />
         <activity android:name="densoftinfotechio.ShowMediaActivity" />
         <activity android:name="densoftinfotechio.RequestsActivity" />
         <activity android:name="densoftinfotechio.WaitingActivity" />
@@ -52,8 +53,7 @@
         <service
             android:name="densoftinfotechio.backgroundservices.BackgroundServiceNotification"
             android:enabled="true"
-            android:exported="true"
-             />
+            android:exported="true" />
 
         <receiver android:name="densoftinfotechio.backgroundservices.BackgroundReceiver">
             <intent-filter>
@@ -127,7 +127,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name="densoftinfotechio.realtimemessaging.agora.activity.MessageActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
