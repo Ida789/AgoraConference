@@ -37,50 +37,18 @@ import densoftinfotechio.agora.openlive.R;
 
 public class BackgroundServiceNotification extends Service {
 
-    //private NotificationManager notificationManager;
     private SharedPreferences preferences;
     private DatabaseReference databaseReference;
     private String channel_id = "nidhikamath";
-    //private String stop = "stop";
 
     @Override
     public void onCreate() {
-
-        //registerReceiver(stopReceiver, new IntentFilter(stop));
         build_notification();
-
-        /*Log.d("OnCreate", "Invoke background service onCreate method.");
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            NotificationChannel notificationChannel = new NotificationChannel(channel_id, "OpenLive-Android", NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.enableVibration(true);
-            notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-        Intent notificationIntent = new Intent(this, PatientViewActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);
-
-        Notification notification = new NotificationCompat.Builder(this, channel_id)
-                .setContentTitle("Example Service")
-                .setContentText("Hey")
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build();
-
-        startForeground(1, notification);*/
         super.onCreate();
     }
 
 
     private void send_notification(int Id, int channel, String date, String sessiontype, int flag) {
-        /*Intent intent = new Intent(this, SplashActivity.class);
-        intent.putExtra("fromNotification", "book_ride");
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);*/
-
-        //notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         String title = "Incoming Call..";
         String message = "";
 
@@ -104,13 +72,7 @@ public class BackgroundServiceNotification extends Service {
 
         Intent intentCancel = new Intent(this, BackgroundReceiver.class);
         intentCancel.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        //This Intent will be called when Confirm button from notification will be
-        //clicked by user.
         PendingIntent pendingIntentConfirm = PendingIntent.getBroadcast(this, 0, intentConfirm, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        //This Intent will be called when Cancel button from notification will be
-        //clicked by user.
         PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(this, 1, intentCancel, PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channel_id)
@@ -140,7 +102,6 @@ public class BackgroundServiceNotification extends Service {
         if(notificationManager!=null) {
             notificationManager.notify(1, builder.build());
         }
-        //startForeground(1, builder.build());
 
     }
 
@@ -244,21 +205,15 @@ public class BackgroundServiceNotification extends Service {
 
                 }
             });
-        } else {
-            Log.d("Background Service ", "none");
         }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //stopForeground(true);
-        //stopSelf();
-        Log.d("here ", "initial ");
         return START_STICKY;
     }
 
     @Nullable
-    @android.support.annotation.Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;

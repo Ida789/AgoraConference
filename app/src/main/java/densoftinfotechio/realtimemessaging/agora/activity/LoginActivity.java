@@ -76,6 +76,7 @@ public class LoginActivity extends Activity {
                     public void run() {
                         Intent intent = new Intent(LoginActivity.this, SelectionActivity.class);
                         intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, mUserId);
+                        Log.d("muser id ", mUserId + "");
                         intent.putExtra("friendname", friendname);
                         intent.putExtra("accountname", accountname);
                         startActivity(intent);

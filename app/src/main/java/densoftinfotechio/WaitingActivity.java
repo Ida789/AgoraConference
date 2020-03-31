@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.classes.Constants;
+import densoftinfotechio.model.EventsModel;
 import densoftinfotechio.model.PatientRequestsModel;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 
@@ -39,8 +40,9 @@ public class WaitingActivity extends AppCompatActivity {
     private SharedPreferences preferences;
     Bundle b;
     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-    SimpleDateFormat sdftime = new SimpleDateFormat("HH:mm");
-    String test_time = "12:08";
+    SimpleDateFormat sdftime = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+    //String test_time = "10:00";
+    HashMap<String, Object> startEvent = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,53 +58,41 @@ public class WaitingActivity extends AppCompatActivity {
         b = getIntent().getExtras();
 
         if (b != null && b.containsKey("channelname") && b.containsKey("type") && preferences != null && preferences.contains("id")) {
-            databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(sdf.format(Calendar.getInstance().getTime()))
-                    .child(test_time).child(b.getString("type", "Audience"))
-                    .child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
+
+            databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
+                    .child(sdf.format(Calendar.getInstance().getTime())).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (!dataSnapshot.exists()/* && test_time.equalsIgnoreCase(sdftime.format(Calendar.getInstance().getTime()))*/) {
-                        fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
-                        tv_loading.startAnimation(fade_animation);
-                        HashMap<String, Object> param = new HashMap<>();
-                        param.put("EventId", preferences.getInt("id", 0));
-                        param.put("PatientId", preferences.getInt("id", 0));
-                        param.put("Status", 0);
-                        param.put("StartEvent", 0);
-                        param.put("Type", b.getString("type", "Audience"));
-                        databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
-                                .child(sdf.format(Calendar.getInstance().getTime())).child(test_time/*sdftime.format(Calendar.getInstance().getTime())*/)
-                                .child(b.getString("type", "Audience")).child(String.valueOf(preferences.getInt("id", 0))).setValue(param);
-                    } else {
-                        PatientRequestsModel requestsModel = dataSnapshot.getValue(PatientRequestsModel.class);
-                        densoftinfotechio.videocall.openlive.Constants.channel = b.getInt("channelname", 0);
-                        if (requestsModel != null) {
-                            if (requestsModel.getStartEvent() == 1) {
-                                if (requestsModel.getStatus() == 1
-                                        && requestsModel.getType().equalsIgnoreCase("Co-Host")) {
-                                    Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                                    i.putExtra("channelname", b.getInt("channelname", 0));
-                                    i.putExtra("type", "Co-Host");
-                                    startActivity(i);
-                                    finish();
-                                } else/* if (requestsModel != null && requestsModel.getStatus().equalsIgnoreCase("2"))*/ {
-                                    Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                                    i.putExtra("channelname", b.getInt("channelname", 0));
-                                    i.putExtra("type", "Audience");
-                                    startActivity(i);
-                                    finish();
+                    //if (dataSnapshot.exists()) {
+                        for (DataSnapshot children : dataSnapshot.getChildren()) {
+                            databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
+                                    .child(sdf.format(Calendar.getInstance().getTime())).child(children.getKey()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    EventsModel eventsModel = dataSnapshot.getValue(EventsModel.class);
+
+                                    if(eventsModel!=null){
+                                        densoftinfotechio.videocall.openlive.Constants.event_time = eventsModel.getFromTime();
+
+                                        if(checktimewithinrange(eventsModel.getEventDate(), eventsModel.getFromTime(), eventsModel.getTotalTime())){
+                                            if(checktime(eventsModel.getEventDate(), eventsModel.getFromTime(), eventsModel.getTotalTime())){
+                                                gotofirebase(eventsModel.getEventDate(), eventsModel.getFromTime());
+                                            }else{
+                                                tv_loading.setText("Sorry this event has ended ");
+                                                tv_join.setVisibility(View.GONE);
+                                            }
+                                        }
+                                    }
+
                                 }
-                            } /*else if (requestsModel.getType().equalsIgnoreCase("Co-Host")) {
 
-                                fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
-                                tv_loading.startAnimation(fade_animation);
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                            }*/else{
-                                checktime(test_time, requestsModel.getType());
-                            }
+                                }
+                            });
                         }
-
-                    }
+                    //}
                 }
 
                 @Override
@@ -113,7 +103,84 @@ public class WaitingActivity extends AppCompatActivity {
         }
     }
 
-    private void checktime(String geteventtime, final String role_type) {
+    private void gotofirebase(final String eventdate, final String eventtime) {
+        databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(eventdate)
+                .child(eventtime).child(b.getString("type", "Audience"))
+                .child(String.valueOf(preferences.getInt("id", 0))).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                //update start event in firebase to start an event
+                startEvent.put("StartEvent", 1);
+                databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(eventdate)
+                        .child(eventtime).child(b.getString("type", "Audience"))
+                        .child(String.valueOf(preferences.getInt("id", 0))).updateChildren(startEvent);
+                databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(eventdate)
+                        .child(eventtime).child(b.getString("type", "Co-Host"))
+                        .child(String.valueOf(preferences.getInt("id", 0))).updateChildren(startEvent);
+
+
+                if (!dataSnapshot.exists()/* && test_time.equalsIgnoreCase(sdftime.format(Calendar.getInstance().getTime()))*/) {
+                    fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
+                    tv_loading.startAnimation(fade_animation);
+                        HashMap<String, Object> param = new HashMap<>();
+                        param.put("EventId", preferences.getInt("id", 0));
+                        param.put("PatientId", preferences.getInt("id", 0));
+                        param.put("Status", 0);
+                        param.put("StartEvent", 0);
+                        param.put("Type", b.getString("type", "Audience"));
+                        databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
+                                .child(eventdate).child(eventtime)
+                                .child(b.getString("type", "Audience")).child(String.valueOf(preferences.getInt("id", 0))).setValue(param);
+                } else {
+                    PatientRequestsModel requestsModel = dataSnapshot.getValue(PatientRequestsModel.class);
+                    densoftinfotechio.videocall.openlive.Constants.channel = b.getInt("channelname", 0);
+                    if (requestsModel != null) {
+                        if (requestsModel.getStartEvent() == 1) {
+                            if (requestsModel.getStatus() == 1) {
+                                if( requestsModel.getType().equalsIgnoreCase("Co-Host")){
+                                    Intent i = new Intent(WaitingActivity.this, MainActivity.class);
+                                    i.putExtra("channelname", b.getInt("channelname", 0));
+                                    i.putExtra("type", "Co-Host");
+                                    startActivity(i);
+                                    finish();
+                                }else{
+                                    Intent i = new Intent(WaitingActivity.this, MainActivity.class);
+                                    i.putExtra("channelname", b.getInt("channelname", 0));
+                                    i.putExtra("type", "Audience");
+                                    startActivity(i);
+                                    finish();
+                                }
+
+                            }else{
+                                if ( requestsModel.getStatus() == 0) {
+                                    if(requestsModel.getType().equalsIgnoreCase("Co-Host")){
+                                        tv_loading.setText("Please Wait while the Admin accepts your request to Join...........");
+                                        fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
+                                        tv_loading.startAnimation(fade_animation);
+                                    }
+                                } else{
+                                    Intent i = new Intent(WaitingActivity.this, MainActivity.class);
+                                    i.putExtra("channelname", b.getInt("channelname", 0));
+                                    i.putExtra("type", "Audience");
+                                    startActivity(i);
+                                    finish();
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+   /* private void checktime(String geteventtime, final String role_type) {
 
         Calendar c = Calendar.getInstance();
         String getcurrenttime = sdftime.format(c.getTime());
@@ -123,18 +190,18 @@ public class WaitingActivity extends AppCompatActivity {
             Date current_time = sdftime.parse(getcurrenttime);
             Date event_time = sdftime.parse(geteventtime);
 
-            if (current_time.before(event_time)) {
+            if (event_time.compareTo(current_time) < 0) {
                 Log.d("time check before ", current_time.before(event_time) + "  current time " + current_time);
                 tv_loading.setText("Event will start at " + geteventtime);
                 tv_join.setVisibility(View.GONE);
-            } else if (current_time.equals(event_time) || current_time.after(event_time)) {
+            } else if (event_time.compareTo(current_time) > 0 || event_time.compareTo(current_time) == 0) {
                 Log.d("time check ", current_time.equals(event_time) + "  current time " + current_time);
                 tv_loading.setText("Event is on ");
                 tv_join.setVisibility(View.VISIBLE);
             } else {
-                /*if(checktime(current_time, checktotal_timeof_event())){
+                *//*if(checktime(current_time, checktotal_timeof_event())){
 
-                }*/
+                }*//*
                 tv_loading.setText("Sorry this event has ended " + geteventtime);
                 tv_join.setVisibility(View.GONE);
             }
@@ -143,86 +210,80 @@ public class WaitingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     densoftinfotechio.videocall.openlive.Constants.channel = b.getInt("channelname", 0);
-                    if (role_type.equalsIgnoreCase("Co-Host")) {
-                        Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-                        i.putExtra("channelname", b.getInt("channelname", 0));
-                        i.putExtra("type", "Co-Host");
-                        startActivity(i);
-                        finish();
-                    } else {
+                    //if (role_type.equalsIgnoreCase("Co-Host")) {
+                    Intent i = new Intent(WaitingActivity.this, MainActivity.class);
+                    i.putExtra("channelname", b.getInt("channelname", 0));
+                    i.putExtra("type", role_type);
+                    startActivity(i);
+                    finish();
+                    *//*} else {
                         Intent i = new Intent(WaitingActivity.this, MainActivity.class);
                         i.putExtra("channelname", b.getInt("channelname", 0));
                         i.putExtra("type", "Audience");
                         startActivity(i);
                         finish();
-                    }
+                    }*//*
                 }
             });
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }*/
+
+    private boolean checktime(String eventdate, String eventtime, long totaltime) {
+        try {
+            Calendar c = Calendar.getInstance();
+            String getcurrenttime = sdftime.format(c.getTime());
+            Date d1 = sdftime.parse(getcurrenttime);
+
+            Date d2 = sdftime.parse(eventdate + " " + eventtime);
+            d2.setMinutes(d2.getMinutes()+(int)totaltime);
+            Calendar calendar2 = Calendar.getInstance();
+            Log.d("time plus 5 is ", "\n current time " + d1.toString() + " \n event time " + d2.toString());
+
+            if(d2.compareTo(d1) < 0){
+                return false;
+            }else{
+                return true;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    /*private String checktotal_timeof_event(String eventtime) {
-
-        Date d = null;
+    private boolean checktimewithinrange(String eventdate, String eventtime, long totaltime){
         try {
-            d = sdftime.parse(eventtime);
+            Date time1 = sdftime.parse(eventdate + " " + eventtime);
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.setTime(time1);
+            //calendar1.add(Calendar.DATE, 1);
+
+            Date time2 = time1;
+            time2.setMinutes(time2.getMinutes() + (int)totaltime);
+            Calendar calendar2 = Calendar.getInstance();
+            calendar2.setTime(time2);
+            //calendar2.add(Calendar.DATE, 1);
+
+            Date d = sdftime.parse(sdftime.format(Calendar.getInstance().getTime()));
+            Calendar calendar3 = Calendar.getInstance();
+            calendar3.setTime(d);
+            //calendar3.add(Calendar.DATE, 1);
+            Log.d("value is ", true + "");
+            Date x = calendar3.getTime();
+            if (x.after(calendar1.getTime()) && x.before(calendar2.getTime())) {
+                Log.d("value is ", true + "");
+                return true;
+            }else{
+                Log.d("value is ", false + "");
+                return false;
+            }
         } catch (ParseException e) {
             e.printStackTrace();
+            return false;
         }
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(d);
-        cal.add(Calendar.MINUTE, 20);
-        String newTime = sdftime.format(cal.getTime());
-        Log.d("old time ", eventtime + " new time " + newTime);
-        return newTime;
-    }*/
+    }
 }
-
-/*
-databaseReference.child("Events").child(b.getString("doctor", "")).child(b.getString("eventdate", ""))
-        .child(b.getString("eventtime", "")).child("Requests")
-        .child(preferences.getString("id", "")).addValueEventListener(new ValueEventListener() {
-@Override
-public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        if (!dataSnapshot.exists()) {
-        HashMap<String, Object> param = new HashMap<>();
-        param.put("PatientId", preferences.getString("id", ""));
-        param.put("Status", "0");
-        param.put("StartEvent", "0");
-        databaseReference.child("Events").child(b.getString("doctor", ""))
-        .child(b.getString("eventdate", "")).child(b.getString("eventtime", ""))
-        .child("Requests").child(preferences.getString("id", "")).setValue(param);
-        } else {
-        PatientRequestsModel requestsModel = dataSnapshot.getValue(PatientRequestsModel.class);
-        if (requestsModel != null && requestsModel.getStartEvent().equalsIgnoreCase("1")) {
-        if (requestsModel != null && requestsModel.getStatus().equalsIgnoreCase("1")) {
-        Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-        i.putExtra("channelname", b.getString("channelname", ""));
-        i.putExtra("type", "Co-Host");
-        startActivity(i);
-        finish();
-        } else if (requestsModel != null && requestsModel.getStatus().equalsIgnoreCase("2")) {
-        Intent i = new Intent(WaitingActivity.this, MainActivity.class);
-        i.putExtra("channelname", b.getString("channelname", ""));
-        i.putExtra("type", "Audience");
-        startActivity(i);
-        finish();
-        }
-        } else {
-        //Case when user
-        checktime(b.getString("eventtime", ""));
-        }
-
-
-        }
-        }
-
-@Override
-public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-        });
-*/

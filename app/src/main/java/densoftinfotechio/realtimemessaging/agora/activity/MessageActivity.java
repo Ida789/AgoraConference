@@ -16,8 +16,8 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.ViewCompat;
@@ -67,7 +68,7 @@ import densoftinfotechio.realtimemessaging.agora.model.MessageBean;
 import densoftinfotechio.realtimemessaging.agora.model.MessageListBean;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
-import densoftinfotechio.videocall.openlive.activities.LiveActivity;
+import densoftinfotechio.videocall.openlive.activities.MainActivity;
 import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
 import io.agora.rtm.RtmChannel;
@@ -78,13 +79,6 @@ import io.agora.rtm.RtmClient;
 import io.agora.rtm.RtmClientListener;
 import io.agora.rtm.RtmMessage;
 import io.agora.rtm.RtmStatusCode;
-
-/*
-import densoftinfotechio.realtimemessaging.agora.rtmtutorial.AGApplication;
-import io.agora.rtm.jni.PEER_ONLINE_STATE;
-import io.agora.rtm.jni.PeerOnlineStatus;
-*/
-
 
 public class MessageActivity extends AppCompatActivity {
     private final String TAG = MessageActivity.class.getSimpleName();
@@ -111,8 +105,7 @@ public class MessageActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage;
     private Uri filePath;
     private SharedPreferences preferences;
-    Bundle b;
-    int accountname = 0, friendname = 0;
+
     String msg = "";
     String imageEncoded;
     List<String> imagesEncodedList;
@@ -122,6 +115,7 @@ public class MessageActivity extends AppCompatActivity {
     String upload_type = "image";
     FusedLocationProviderClient mFusedLocationClient;
     int PERMISSION_ID = 44;
+    boolean isTextChat = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,17 +134,22 @@ public class MessageActivity extends AppCompatActivity {
         media_options();
 
         preferences = PreferenceManager.getDefaultSharedPreferences(MessageActivity.this);
-        b = getIntent().getExtras();
-        if (b != null && b.containsKey("accountname") && b.containsKey("friendname")) {
-            accountname = b.getInt("accountname");
-            friendname = b.getInt("friendname");
-
+        /*b = getIntent().getExtras();
+        if (b != null ) {
             mMessageBeanList.clear();
+            if(b.containsKey("accountname") && b.containsKey("friendname")){
+                accountname = b.getInt("accountname");
+                friendname = b.getInt("friendname");
+                mMessageBeanList.clear();
+                getChat_from_sqlite(friendname);
+            }else if(b.containsKey("accountname")){
+                accountname = b.getInt("accountname");
+                mMessageBeanList.clear();
+                getChat_from_sqlite(accountname);
+            }
 
-            getChat_from_sqlite(friendname);
+        }*/
 
-
-        }
         //firebaseStorage = FirebaseStorage.getInstance("gs://videoconferencedemo.appspot.com");
         storageReference = FirebaseStorage.getInstance().getReference(Constants.firebasestoragename);
 
@@ -181,17 +180,25 @@ public class MessageActivity extends AppCompatActivity {
         mIsPeerToPeerMode = intent.getBooleanExtra(MessageUtil.INTENT_EXTRA_IS_PEER_MODE, true);
         mUserId = intent.getStringExtra(MessageUtil.INTENT_EXTRA_USER_ID);
         String targetName = intent.getStringExtra(MessageUtil.INTENT_EXTRA_TARGET_NAME);
-
+        getChat_from_sqlite(targetName);
         mTitleTextView = findViewById(R.id.message_title);
+
+        Log.d("target name channel ", targetName);
+        if(intent.hasExtra("istext")){
+            isTextChat = true;
+            Log.d("target text chat ", true + "");
+        }
+
+
         if (mIsPeerToPeerMode) {
             mPeerId = targetName;
             mTitleTextView.setText(mPeerId);
 
-            // load history chat records
+            /*// load history chat records
             MessageListBean messageListBean = MessageUtil.getExistMessageListBean(mPeerId);
             if (messageListBean != null) {
                 mMessageBeanList.addAll(messageListBean.getMessageBeanList());
-            }
+            }*/
 
             // load offline messages since last chat with this peer.
             // Then clear cached offline messages from message pool
@@ -242,7 +249,9 @@ public class MessageActivity extends AppCompatActivity {
                         backgroundUpload.execute(Constants.uris.get(i));
                     }
                 } else if (!msg.equals("")) {
-                    MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                    MessageBean messageBean = new MessageBean(mUserId, msg, true,
+                            DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                            DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
                     mMessageBeanList.add(messageBean);
                     mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
                     mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
@@ -264,7 +273,9 @@ public class MessageActivity extends AppCompatActivity {
                         backgroundUpload.execute(Constants.uris.get(i));
                     }
                 } else if (!msg.equals("")) {
-                    MessageBean messageBean = new MessageBean(mUserId, msg, true);
+                    MessageBean messageBean = new MessageBean(mUserId, msg, true,
+                            DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                            DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
                     mMessageBeanList.add(messageBean);
                     mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
                     mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
@@ -400,26 +411,12 @@ public class MessageActivity extends AppCompatActivity {
 
         //finish();
 
-        try {
+        /*try {
             mRtmClient.logout(null);
             MessageUtil.cleanMessageListBeanList();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        if (preferences != null && preferences.contains("loginpatient")) {
-            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
-            startActivity(i);
-            finish();
-        } else if (preferences != null && preferences.contains("logindoctor")) {
-            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
-            startActivity(i);
-            finish();
-        } else {
-            Intent i = new Intent(MessageActivity.this, LoginActivity.class);
-            startActivity(i);
-            finish();
-        }
+        }*/
 
     }
 
@@ -439,7 +436,7 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
 
-                saveChat_in_sqlite(content, mPeerId, true);
+                saveChat_in_sqlite(content, mPeerId, true, true);
 
             }
 
@@ -460,7 +457,7 @@ public class MessageActivity extends AppCompatActivity {
                                 break;
                             case RtmStatusCode.PeerMessageError.PEER_MESSAGE_ERR_CACHED_BY_SERVER:
                                 //showToast(getString(R.string.message_cached));
-                                saveChat_in_sqlite(content, mPeerId, true);
+                                saveChat_in_sqlite(content, mPeerId, true, true);
                                 break;
 
                         }
@@ -470,18 +467,24 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void saveChat_in_sqlite(String content, String mPeerId, boolean beSelf) {
+    private void saveChat_in_sqlite(String content, String Id, boolean beSelf, boolean isPeer) {
         try {
             JSONObject messagebean = new JSONObject();
-            messagebean.put("account", preferences.getInt("id", 0));
+            messagebean.put("account", Id);
             messagebean.put("message", content);
             messagebean.put("beSelf", beSelf);
-
             ContentValues c = new ContentValues();
-            c.put(DatabaseHelper.JSON_CHAT, messagebean.toString());
-            c.put(DatabaseHelper.ROOM_NAME, String.valueOf(mPeerId));
-            c.put(DatabaseHelper.CHAT_DATE, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate());
-            c.put(DatabaseHelper.CHAT_TIME, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
+            if(isPeer){
+                c.put(DatabaseHelper.JSON_CHAT, messagebean.toString());
+                c.put(DatabaseHelper.ROOM_NAME, String.valueOf(Id)); //peerId
+                c.put(DatabaseHelper.CHAT_DATE, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate());
+                c.put(DatabaseHelper.CHAT_TIME, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
+            }else{
+                c.put(DatabaseHelper.JSON_CHAT, messagebean.toString());
+                c.put(DatabaseHelper.ROOM_NAME, String.valueOf(mChannelName));
+                c.put(DatabaseHelper.CHAT_DATE, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate());
+                c.put(DatabaseHelper.CHAT_TIME, DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
+            }
             DatabaseHelper.getInstance(MessageActivity.this).save_TABLE_CHAT(c, mPeerId);
 
         } catch (Exception e) {
@@ -489,22 +492,22 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
 
-    private void getChat_from_sqlite(int roomname) {
+    private void getChat_from_sqlite(String roomname) {
         try {
 
-            JSONArray array_chat = DatabaseHelper.getInstance(MessageActivity.this).get_TABLE_CHAT(roomname);
+            if(!roomname.trim().equals("")){
+                JSONArray array_chat = DatabaseHelper.getInstance(MessageActivity.this).get_TABLE_CHAT(Integer.parseInt(roomname));
 
-            Log.d("array ", array_chat + "");
+                Log.d("array ", array_chat + "");
 
-            if (array_chat != null && array_chat.length() > 0) {
-                for (int i = 0; i < array_chat.length(); i++) {
-                    JSONObject obj = new JSONObject(array_chat.optString(i));
-                    mMessageBeanList.add(new MessageBean(obj.getString("account"), obj.getString("message"),
-                            obj.optBoolean("beSelf")));
+                if (array_chat != null && array_chat.length() > 0) {
+                    for (int i = 0; i < array_chat.length(); i++) {
+                        JSONObject obj = new JSONObject(array_chat.optString(i));
+                        mMessageBeanList.add(new MessageBean(obj.getString("account"), obj.getString("message"),
+                                obj.optBoolean("beSelf"), obj.getString("date"),obj.getString("time")));
+                    }
                 }
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -534,12 +537,12 @@ public class MessageActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(ErrorInfo errorInfo) {
-                Log.e(TAG, "join channel failed");
+                Log.e(TAG, "join channel failed " + errorInfo.getErrorDescription());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        showToast(getString(R.string.join_channel_failed));
-                        finish();
+                        //showToast(getString(R.string.join_channel_failed));
+                        //finish();
                     }
                 });
             }
@@ -587,7 +590,7 @@ public class MessageActivity extends AppCompatActivity {
         mRtmChannel.sendMessage(message, new ResultCallback<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                saveChat_in_sqlite(content, mChannelName, true);
+                saveChat_in_sqlite(content, mUserId, true, false);
             }
 
             @Override
@@ -663,7 +666,9 @@ public class MessageActivity extends AppCompatActivity {
                     String content = message.getText();
                     Log.d("message recvd ", "in onMessageReceives is " + content);
                     if (peerId.equals(mPeerId)) {
-                        MessageBean messageBean = new MessageBean(peerId, content, false);
+                        MessageBean messageBean = new MessageBean(peerId, content, false,
+                                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
                         messageBean.setBackground(getMessageColor(peerId));
                         mMessageBeanList.add(messageBean);
                         mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
@@ -672,7 +677,7 @@ public class MessageActivity extends AppCompatActivity {
                         MessageUtil.addMessageBean(peerId, content);
                     }
 
-                    saveChat_in_sqlite(content, peerId, false);
+                    saveChat_in_sqlite(content, peerId, false, true);
 
                     /*Log.d("message details recv ", "\npeer id " + peerId + "\nmessage " + message +
                             "\ncontent " + content);*/
@@ -713,10 +718,12 @@ public class MessageActivity extends AppCompatActivity {
                     String account = fromMember.getUserId();
                     String msg = message.getText();
 
-                    saveChat_in_sqlite(msg, account, false);
+                    saveChat_in_sqlite(msg, account, false, false);
 
                     Log.i(TAG, "onMessageReceived account = " + account + " msg = " + msg);
-                    MessageBean messageBean = new MessageBean(account, msg, false);
+                    MessageBean messageBean = new MessageBean(account, msg, false,
+                            DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                            DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
                     messageBean.setBackground(getMessageColor(account));
                     mMessageBeanList.add(messageBean);
                     mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
@@ -788,7 +795,8 @@ public class MessageActivity extends AppCompatActivity {
 
                         // Get the cursor
                         Cursor cursor = getContentResolver().query(mImageUri,
-                                filePathColumn, null, null, null);
+                                filePathColumn, null, null,
+                                null);
                         // Move to first row
                         cursor.moveToFirst();
 
@@ -799,6 +807,10 @@ public class MessageActivity extends AppCompatActivity {
                         Constants.uris.add(mImageUri);
                         galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
                         recyclerview.setAdapter(galleryAdapter);
+
+                        Toast toast = Toast.makeText(this, "Your image has been selected", Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
 
                     } else if (data.getClipData() != null) {
                         ClipData mClipData = data.getClipData();
@@ -821,6 +833,10 @@ public class MessageActivity extends AppCompatActivity {
                             galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
                             recyclerview.setAdapter(galleryAdapter);
 
+                            Toast toast = Toast.makeText(this, "Your images have been selected", Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();
+
                         }
 
                         Log.v("LOG_TAG", "Selected Images" + Constants.uris.size());
@@ -841,6 +857,10 @@ public class MessageActivity extends AppCompatActivity {
                     }
                     Log.d("video path ", vidPath);
                     Constants.uris.add(selectedVideoUri);
+
+                    Toast toast = Toast.makeText(this, "Your video has been selected", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
                     //uploadDatatoFirestore(selectedVideoUri, "video");
                 }
             }
@@ -868,8 +888,12 @@ public class MessageActivity extends AppCompatActivity {
 
     private void uploadDatatoFirestore(final Uri filePath, final String type) {
         if (filePath != null && preferences != null) {
-
-            final StorageReference ref = storageReference.child(accountname + "-" + friendname).child(UUID.randomUUID().toString());
+            final StorageReference ref = storageReference.child(String.valueOf(mUserId)).child(UUID.randomUUID().toString());
+            /*if(friendname==0){
+                ref = storageReference.child(String.valueOf(accountname)).child(UUID.randomUUID().toString());
+            }else{
+                ref = storageReference.child(accountname + "-" + friendname).child(UUID.randomUUID().toString());
+            }*/
 
             ref.putFile(filePath).addOnSuccessListener(
                     new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -886,7 +910,9 @@ public class MessageActivity extends AppCompatActivity {
                                     if (type.equalsIgnoreCase("image")) {
                                         Log.d("url download is ", uri.toString() + "~image");
 
-                                        MessageBean messageBean = new MessageBean(mUserId, (uri.toString() + "~image"), true);
+                                        MessageBean messageBean = new MessageBean(mUserId, (uri.toString() + "~image"), true,
+                                                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                                                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
                                         mMessageBeanList.add(messageBean);
                                         mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
                                         mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
@@ -902,7 +928,9 @@ public class MessageActivity extends AppCompatActivity {
                                     } else if (type.equalsIgnoreCase("video")) {
                                         Log.d("url download is ", uri.toString() + "~video");
 
-                                        MessageBean messageBean = new MessageBean(mUserId, (uri.toString() + "~video"), true);
+                                        MessageBean messageBean = new MessageBean(mUserId, (uri.toString() + "~video"), true,
+                                                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                                                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
                                         mMessageBeanList.add(messageBean);
                                         mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
                                         mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);
@@ -949,6 +977,7 @@ public class MessageActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
+        try{
         /*try {
             mRtmClient.logout(null);
             MessageUtil.cleanMessageListBeanList();
@@ -956,20 +985,64 @@ public class MessageActivity extends AppCompatActivity {
             e.printStackTrace();
         }*/
 
-        if (preferences != null && preferences.contains("loginpatient")) {
-            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
-            i.putExtra("channelname", densoftinfotechio.videocall.openlive.Constants.channel);
-            startActivity(i);
-            finish();
-        } else if (preferences != null && preferences.contains("logindoctor")) {
-            Intent i = new Intent(MessageActivity.this, LiveActivity.class);
-            i.putExtra("channelname", densoftinfotechio.videocall.openlive.Constants.channel);
-            startActivity(i);
-            finish();
+        if (mMessageBeanList != null) {
+            mMessageBeanList.clear();
+        }
+
+        if(isTextChat){
+            if (preferences != null && preferences.contains("loginpatient")) {
+                Intent i = new Intent(MessageActivity.this, PatientViewActivity.class);
+                startActivity(i);
+                finish();
+            } else if (preferences != null && preferences.contains("logindoctor")) {
+                Intent i = new Intent(MessageActivity.this, DoctorViewActivity.class);
+                startActivity(i);
+                finish();
+            } else {
+                Intent i = new Intent(MessageActivity.this, LoginActivity.class);
+                startActivity(i);
+                finish();
+            }
+        } else if (mIsPeerToPeerMode) {
+            if (preferences != null && preferences.contains("loginpatient")) {
+                Intent i = new Intent(MessageActivity.this, MainActivity.class);
+                i.putExtra("channelname", densoftinfotechio.videocall.openlive.Constants.channel);
+                startActivity(i);
+                finish();
+            } else if (preferences != null && preferences.contains("logindoctor")) {
+                Intent i = new Intent(MessageActivity.this, MainActivity.class);
+                Log.d("target name intent ", mChannelName);
+                i.putExtra("channelname", densoftinfotechio.videocall.openlive.Constants.channel);
+                startActivity(i);
+                finish();
+            } else {
+                Intent i = new Intent(MessageActivity.this, LoginActivity.class);
+                startActivity(i);
+                finish();
+            }
         } else {
-            Intent i = new Intent(MessageActivity.this, LoginActivity.class);
-            startActivity(i);
-            finish();
+            if (preferences != null && preferences.contains("loginpatient")) {
+                Intent i = new Intent(MessageActivity.this, MainActivity.class);
+                Log.d("channelname ", mChannelName);
+                i.putExtra("channelname", Integer.parseInt(mChannelName));
+                i.putExtra("type", densoftinfotechio.videocall.openlive.Constants.type);
+                startActivity(i);
+                finish();
+            } else if (preferences != null && preferences.contains("logindoctor")) {
+                Log.d("channelname ", mChannelName);
+                Intent i = new Intent(MessageActivity.this, MainActivity.class);
+                i.putExtra("channelname", Integer.parseInt(mChannelName));
+                i.putExtra("type", "Host");
+                startActivity(i);
+                finish();
+            } else {
+                Intent i = new Intent(MessageActivity.this, LoginActivity.class);
+                startActivity(i);
+                finish();
+            }
+        }
+    }catch(Exception e){
+            e.printStackTrace();
         }
 
     }
@@ -1068,7 +1141,9 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void send_live_location(String uri) {
-        MessageBean messageBean = new MessageBean(mUserId, (uri), true);
+        MessageBean messageBean = new MessageBean(mUserId, (uri), true,
+                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentDate(),
+                DateAndTimeUtils.getInstance(MessageActivity.this).getCurrentTime());
         mMessageBeanList.add(messageBean);
         mMessageAdapter.notifyItemRangeChanged(mMessageBeanList.size(), 1);
         mRecyclerView.scrollToPosition(mMessageBeanList.size() - 1);

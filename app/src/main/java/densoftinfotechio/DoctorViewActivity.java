@@ -32,10 +32,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import densoftinfotechio.adapter.DoctorViewAdapter;
 import densoftinfotechio.backgroundservices.BackgroundServiceNotification;
+import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
+import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
+import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
 import densoftinfotechio.videocall.openlive.Constants;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 import densoftinfotechio.model.PatientModel;
 import densoftinfotechio.agora.openlive.R;
+import io.agora.rtm.ErrorInfo;
+import io.agora.rtm.ResultCallback;
+import io.agora.rtm.RtmClient;
 
 public class DoctorViewActivity extends AppCompatActivity {
 
@@ -77,8 +83,6 @@ public class DoctorViewActivity extends AppCompatActivity {
         edit = preferences.edit();
         if (preferences != null && preferences.contains("id")) {
             et_doctor_id.setText(String.valueOf(preferences.getInt("id", 0)));
-
-            //delete_this_method();
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
@@ -91,12 +95,13 @@ public class DoctorViewActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    patientModels.clear();
                     for (final DataSnapshot patients : dataSnapshot.getChildren()) {
                         databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 for (final DataSnapshot patient_list : dataSnapshot.getChildren()) {
-                                    patientModels.clear();
+
                                     databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(patients.getKey()).child(patient_list.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -137,43 +142,41 @@ public class DoctorViewActivity extends AppCompatActivity {
 
     }
 
-    public void gotoCall(final int doctor, final String date, final int patient, final int channel, final String sessionType) {
-        databaseReference.child("DoctorList").child(String.valueOf(doctor)).child(date).child(String.valueOf(patient)).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void gotoCall(final PatientModel patientModel) {
+        databaseReference.child("PatientList").child(String.valueOf(patientModel.getPatientId())).child(patientModel.getDate()).child(String.valueOf(patientModel.getDoctorId())).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
 
                     HashMap<String, Object> paramupdate = new HashMap<>();
+
+
                     paramupdate.put("InitiateCall", 1);
                     //databaseReference.child("Appointments").child("doctor"+doctor).child(date).child(patient).updateChildren(paramupdate);
-                    databaseReference.child("PatientList").child(String.valueOf(patient)).child(date).child(String.valueOf(doctor)).updateChildren(paramupdate);
+                    databaseReference.child("PatientList").child(String.valueOf(patientModel.getPatientId())).child(patientModel.getDate()).child(String.valueOf(patientModel.getDoctorId())).updateChildren(paramupdate);
 
+                    paramupdate.put("InitiateCall", 2);
+                    databaseReference.child("DoctorList").child(String.valueOf(patientModel.getDoctorId())).child(patientModel.getDate()).child(String.valueOf(patientModel.getPatientId())).updateChildren(paramupdate);
 
-
-
-                    Constants.doctorId = doctor;
-                    Constants.patientId = patient;
-                    Constants.channel = channel;
+                    Constants.doctorId = patientModel.getDoctorId();
+                    Constants.patientId = patientModel.getPatientId();
+                    Constants.channel = patientModel.getChannel();
                     Log.d("call value sent ", Constants.doctorId + " " + Constants.patientId);
 
-                    if (sessionType.equalsIgnoreCase("Video")) {
+                    if (patientModel.getSessionType().equalsIgnoreCase("Video")) {
                         Intent i = new Intent(DoctorViewActivity.this, MainActivity.class);
-                        i.putExtra("channelname", channel);
+                        i.putExtra("channelname", patientModel.getChannel());
                         //i.putExtra("type", "Host");
                         startActivity(i);
                         //finish();
 
-                    } else if (sessionType.equalsIgnoreCase("Audio")) {
+                    } else if (patientModel.getSessionType().equalsIgnoreCase("Audio")) {
                         Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
-                        i.putExtra("channelname", channel);
+                        i.putExtra("channelname", patientModel.getChannel());
                         startActivity(i);
                         //finish();
-                    } else if(sessionType.equalsIgnoreCase("Text")){
-                        Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
-                        i.putExtra("accountname", doctor);
-                        i.putExtra("friendname", patient);
-                        startActivity(i);
-                        //finish();
+                    } else if(patientModel.getSessionType().equalsIgnoreCase("Text")){
+                        doLogin(patientModel.getPatientId(), patientModel.getDoctorId());
                     }
                 }
             }
@@ -276,11 +279,6 @@ public class DoctorViewActivity extends AppCompatActivity {
                 startActivity(i2);
                 break;
 
-            case R.id.accept_requests:
-                Intent i3 = new Intent(DoctorViewActivity.this, RequestsActivity.class);
-                startActivity(i3);
-                break;
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -295,17 +293,48 @@ public class DoctorViewActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    @Override
-    protected void onStop() {
-        //startService(new Intent(DoctorViewActivity.this, BackgroundServiceNotification.class));
-        super.onStop();
-    }
-    private void delete_this_method() {
-        Intent i = new Intent(DoctorViewActivity.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
-        i.putExtra("accountname", preferences.getInt("id", 0));
-        i.putExtra("friendname", 111);
-        startActivity(i);
-        finish();
-    }
+    private void doLogin(final int friendname, final int accountname) {
+        ChatManager mChatManager = AgoraApplication.the().getChatManager();
+        RtmClient mRtmClient = mChatManager.getRtmClient();
+        mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
+            @Override
+            public void onSuccess(Void responseInfo) {
+                Log.i("patient view", "login success");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(DoctorViewActivity.this, SelectionActivity.class);
+                        intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                        Log.d("muser id ", accountname + " live activity" );
+                        intent.putExtra("friendname", friendname);
+                        intent.putExtra("accountname", accountname);
+                        intent.putExtra("istext", true);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+            }
 
+            @Override
+            public void onFailure(final ErrorInfo errorInfo) {
+                Log.i("patient view ", "login failed: " + errorInfo.getErrorCode());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(errorInfo.getErrorCode() ==8){
+                            Intent intent = new Intent(DoctorViewActivity.this, SelectionActivity.class);
+                            intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                            Log.d("muser id ", accountname + " live activity" );
+                            intent.putExtra("friendname", friendname);
+                            intent.putExtra("accountname", accountname);
+                            intent.putExtra("istext", true);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                    }
+                });
+            }
+        });
+    }
 }

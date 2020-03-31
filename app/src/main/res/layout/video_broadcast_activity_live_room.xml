@@ -27,7 +27,8 @@
                     android:id="@+id/live_room_top_layout"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/live_top_layout_height"
-                    android:layout_alignParentTop="true">
+                    android:layout_alignParentTop="true"
+                    android:visibility="gone">
 
                     <ImageView
                         android:layout_width="@dimen/live_leave_btn_size"

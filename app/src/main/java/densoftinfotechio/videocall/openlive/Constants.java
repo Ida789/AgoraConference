@@ -33,8 +33,12 @@ public class Constants {
 
     public static int callinitiatedInActivity = 0;
 
+
+    //Temporary constants. Check places where these are used and replace
     public static int doctorId = 0;
     public static int patientId = 0;
     public static int channel = 0;
+    public static String type = "Audience";
+    public static String event_time = "";
 
 }

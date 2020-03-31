@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,13 +24,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,13 +39,10 @@ import densoftinfotechio.adapter.RequestsAdapter;
 import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.model.EventsModel;
 import densoftinfotechio.model.PatientRequestsModel;
-import densoftinfotechio.realtimemessaging.agora.activity.LoginActivity;
-import densoftinfotechio.realtimemessaging.agora.activity.MessageActivity;
 import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
-import densoftinfotechio.realtimemessaging.agora.model.MessageBean;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
-import densoftinfotechio.screenshare.app.BroadcasterActivity;
+
 import densoftinfotechio.videocall.openlive.stats.LocalStatsData;
 import densoftinfotechio.videocall.openlive.stats.RemoteStatsData;
 import densoftinfotechio.videocall.openlive.stats.StatsData;
@@ -57,13 +53,8 @@ import io.agora.rtc.video.VideoEncoderConfiguration;
 import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
 import io.agora.rtm.RtmChannel;
-import io.agora.rtm.RtmChannelAttribute;
-import io.agora.rtm.RtmChannelListener;
-import io.agora.rtm.RtmChannelMember;
 import io.agora.rtm.RtmClient;
 import io.agora.rtm.RtmClientListener;
-import io.agora.rtm.RtmMessage;
-import io.agora.rtm.RtmStatusCode;
 
 public class LiveActivityEvent extends RtcBaseActivity {
     private static final String TAG = LiveActivityEvent.class.getSimpleName();
@@ -84,7 +75,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
     private Calendar c = Calendar.getInstance();
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
     private SimpleDateFormat simpleDateFormat_time = new SimpleDateFormat("HH:mm", Locale.getDefault());
-    String test_time = "12:08";
+    //String test_time = "10:12";
     private String ROLE_CO_HOST = "Co-Host";
     RelativeLayout bottom_container;
 
@@ -93,6 +84,10 @@ public class LiveActivityEvent extends RtcBaseActivity {
     private RtmClientListener mClientListener;
     private RtmChannel mRtmChannel;
     private int mChannelMemberCount = 1;
+
+    private boolean mIsInChat = false;
+    int test_channel = 1200;
+    int role = 2; //by default audience
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,196 +102,50 @@ public class LiveActivityEvent extends RtcBaseActivity {
         recycler_view_requests = findViewById(R.id.recycler_view_requests);
 
         bottom_container = findViewById(R.id.bottom_container);
+        ImageView live_btn_switch_camera = findViewById(R.id.live_btn_switch_camera);
+        ImageView live_btn_beautification = findViewById(R.id.live_btn_beautification);
+        ImageView live_btn_more = findViewById(R.id.live_btn_more);
+        ImageView live_btn_mute_audio = findViewById(R.id.live_btn_mute_audio);
+        ImageView live_btn_mute_video = findViewById(R.id.live_btn_mute_video);
 
         if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")){
             recycler_view_requests.setVisibility(View.VISIBLE);
             bottom_container.setVisibility(View.VISIBLE);
+
         }else{
-            recycler_view_requests.setVisibility(View.GONE);
-            bottom_container.setVisibility(View.GONE);
+            if(role == 1){
+                bottom_container.setVisibility(View.VISIBLE);
+                //role == 1 broadcaster and role == 2 audience
+            }else{
+                recycler_view_requests.setVisibility(View.GONE);
+                live_btn_switch_camera.setVisibility(View.GONE);
+                live_btn_beautification.setVisibility(View.GONE);
+                live_btn_more.setVisibility(View.GONE);
+                live_btn_mute_audio.setVisibility(View.GONE);
+                live_btn_mute_video.setVisibility(View.GONE);
+                rtcEngine().muteLocalAudioStream(true);
+                live_btn_mute_audio.setActivated(false);
+            }
         }
 
         layoutManager = new LinearLayoutManager(LiveActivityEvent.this);
         recycler_view_requests.setLayoutManager(layoutManager);
 
-        init_rtm();
-
-        get_audience();
-    }
-
-    private void init_rtm() {
-        mChatManager = AgoraApplication.the().getChatManager();
+        ChatManager mChatManager = AgoraApplication.the().getChatManager();
         mRtmClient = mChatManager.getRtmClient();
-        /*mClientListener = new MyRtmClientListener();
-        mChatManager.registerListener(mClientListener);*/
 
-        createAndJoinChannel();
-    }
-    private void createAndJoinChannel() {
-
-        mRtmClient.login(null, String.valueOf(sharedPreferences.getInt("id", 0)), new ResultCallback<Void>() {
-            @Override
-            public void onSuccess(Void responseInfo) {
-                Log.i(TAG, "login success");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // step 1: create a channel instance
-                        mRtmChannel = mRtmClient.createChannel(String.valueOf(sharedPreferences.getInt("id", 0)), new MyChannelListener());
-                        if (mRtmChannel == null) {
-                            //showToast(getString(R.string.join_channel_failed));
-                            //finish();
-                            return;
-                        }
-
-                        //Log.e("channel", mRtmChannel + "");
-
-                        // step 2: join the channel
-                        mRtmChannel.join(new ResultCallback<Void>() {
-                            @Override
-                            public void onSuccess(Void responseInfo) {
-                                Log.i(TAG, "join channel success");
-                                getChannelMemberList();
-                            }
-
-                            @Override
-                            public void onFailure(ErrorInfo errorInfo) {
-                                Log.e(TAG, "join channel failed");
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //showToast(getString(R.string.join_channel_failed));
-                                        finish();
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(ErrorInfo errorInfo) {
-                Log.i(TAG, "login failed: " + errorInfo.getErrorCode());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
-            }
-        });
-    }
-
-    class MyChannelListener implements RtmChannelListener {
-        @Override
-        public void onMemberCountUpdated(int i) {
-
-        }
-
-        @Override
-        public void onAttributesUpdated(List<RtmChannelAttribute> list) {
-
-        }
-
-        @Override
-        public void onMessageReceived(final RtmMessage message, final RtmChannelMember fromMember) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String account = fromMember.getUserId();
-                    String msg = message.getText();
-                }
-            });
-        }
-
-        @Override
-        public void onMemberJoined(RtmChannelMember member) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mChannelMemberCount++;
-                }
-            });
-        }
-
-        @Override
-        public void onMemberLeft(RtmChannelMember member) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mChannelMemberCount--;
-                }
-            });
-        }
+        get_co_hosts();
     }
 
 
-    private void getChannelMemberList() {
-        mRtmChannel.getMembers(new ResultCallback<List<RtmChannelMember>>() {
-            @Override
-            public void onSuccess(final List<RtmChannelMember> responseInfo) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mChannelMemberCount = responseInfo.size();
-                        Log.d("message details size ", "\nNumber of members  " + mChannelMemberCount);
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(ErrorInfo errorInfo) {
-                Log.e(TAG, "failed to get channel members, err: " + errorInfo.getErrorCode());
-            }
-        });
-    }
-
-    /*class MyRtmClientListener implements RtmClientListener {
-
-        @Override
-        public void onConnectionStateChanged(final int state, int reason) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    switch (state) {
-                        case RtmStatusCode.ConnectionState.CONNECTION_STATE_RECONNECTING:
-                            //showToast(getString(R.string.reconnecting));
-                            break;
-                        case RtmStatusCode.ConnectionState.CONNECTION_STATE_ABORTED:
-                            //showToast(getString(R.string.account_offline));
-                            setResult(MessageUtil.ACTIVITY_RESULT_CONN_ABORTED);
-                            finish();
-                            break;
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onMessageReceived(RtmMessage rtmMessage, String s) {
-
-        }
-
-        @Override
-        public void onTokenExpired() {
-
-        }
-
-        *//*@Override
-        public void onPeersOnlineStatusChanged(Map<String, Integer> map) {
-
-        }*//*
-    }*/
-
-    private void get_audience() {
+    private void get_co_hosts() {
         databaseReference = FirebaseDatabase.getInstance().getReference(densoftinfotechio.classes.Constants.firebasedatabasename);
 
         requestsAdapter = new RequestsAdapter(LiveActivityEvent.this, requestsModels);
         recycler_view_requests.setAdapter(requestsAdapter);
 
         databaseReference.child("Events").child(String.valueOf(sharedPreferences.getInt("id", 0))).child(simpleDateFormat.format(c.getTime()))
-                .child(test_time/*simpleDateFormat_time.format(c.getTime())*/).addListenerForSingleValueEvent(new ValueEventListener() {
+                .child(densoftinfotechio.videocall.openlive.Constants.event_time/*simpleDateFormat_time.format(c.getTime())*/).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
@@ -317,14 +166,14 @@ public class LiveActivityEvent extends RtcBaseActivity {
     private void published_events(final long audience){
         if(sharedPreferences!=null && sharedPreferences.contains("id")){
             databaseReference.child("Events").child(String.valueOf(sharedPreferences.getInt("id", 0))).child(simpleDateFormat.format(c.getTime()))
-                    .child(test_time/*simpleDateFormat_time.format(c.getTime())*/).child(ROLE_CO_HOST).addValueEventListener(new ValueEventListener() {
+                    .child(densoftinfotechio.videocall.openlive.Constants.event_time/*simpleDateFormat_time.format(c.getTime())*/).child(ROLE_CO_HOST).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()){
                         requestsModels.clear();
                         for(DataSnapshot children: dataSnapshot.getChildren()){
                             databaseReference.child("Events").child(String.valueOf(sharedPreferences.getInt("id", 0)))
-                                    .child(simpleDateFormat.format(c.getTime())).child(test_time/*simpleDateFormat_time.format(c.getTime())*/)
+                                    .child(simpleDateFormat.format(c.getTime())).child(densoftinfotechio.videocall.openlive.Constants.event_time/*simpleDateFormat_time.format(c.getTime())*/)
                                     .child(ROLE_CO_HOST).child(children.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -361,7 +210,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
 
         initUserIcon();
 
-        int role = getIntent().getIntExtra(
+        role = getIntent().getIntExtra(
                 densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE,
                 Constants.CLIENT_ROLE_AUDIENCE);
         boolean isBroadcaster =  (role == Constants.CLIENT_ROLE_BROADCASTER);
@@ -536,12 +385,12 @@ public class LiveActivityEvent extends RtcBaseActivity {
     @Override
     public void finish() {
         super.finish();
-        statsManager().clearAllData();
+        //statsManager().clearAllData();
     }
 
     public void onLeaveClicked(View view) {
 
-        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
+        /*if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
             Intent i = new Intent(LiveActivityEvent.this, DoctorViewActivity.class);
             startActivity(i);
             finish();
@@ -551,7 +400,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
             startActivity(i);
             finish();
         }
-        statsManager().clearAllData();
+        statsManager().clearAllData();*/
     }
 
     public void onSwitchCameraClicked(View view) {
@@ -570,19 +419,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
 
     public void onPushStreamClicked(View view) {
         // Do nothing at the moment
-
-        getChannelMemberList();
-        Intent i = new Intent(LiveActivityEvent.this, densoftinfotechio.realtimemessaging.agora.activity.LoginActivity.class);
-
-        if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
-            i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.doctorId);
-            i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.patientId);
-        }else{
-            i.putExtra("accountname", densoftinfotechio.videocall.openlive.Constants.patientId);
-            i.putExtra("friendname", densoftinfotechio.videocall.openlive.Constants.doctorId);
-        }
-        startActivity(i);
-        finish();
+        doLogin(sharedPreferences.getInt("id", 0));
     }
 
     public void onMuteAudioClicked(View view) {
@@ -603,6 +440,8 @@ public class LiveActivityEvent extends RtcBaseActivity {
 
     @Override
     public void onBackPressed() {
+        statsManager().clearAllData();
+        doLogout();
         if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")) {
             Intent i = new Intent(LiveActivityEvent.this, DoctorViewActivity.class);
             startActivity(i);
@@ -612,20 +451,70 @@ public class LiveActivityEvent extends RtcBaseActivity {
             startActivity(i);
             finish();
         }
-        statsManager().clearAllData();
+
         super.onBackPressed();
     }
 
     public void onScreenSharingClicked(View view) {
-        Intent i = new Intent(LiveActivityEvent.this, BroadcasterActivity.class);
-        startActivity(i);
+        //Intent i = new Intent(LiveActivityEvent.this, BroadcasterActivity.class);
+        //startActivity(i);
     }
 
 
-    public void call_status(String i, int patientId) {
+    public void call_status(int i, int patientId) {
         HashMap<String, Object> param = new HashMap<>();
         param.put("Status", i);
         databaseReference.child("Events").child(String.valueOf(sharedPreferences.getInt("id", 0))).child(simpleDateFormat.format(c.getTime()))
-                .child(test_time/*simpleDateFormat_time.format(c.getTime())*/).child(ROLE_CO_HOST).child(String.valueOf(patientId)).updateChildren(param);
+                .child(densoftinfotechio.videocall.openlive.Constants.event_time/*simpleDateFormat_time.format(c.getTime())*/).child(ROLE_CO_HOST).child(String.valueOf(patientId)).updateChildren(param);
+    }
+
+    private void doLogin(final int accountname) {
+
+        mIsInChat = true;
+
+            mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
+                @Override
+                public void onSuccess(Void responseInfo) {
+                    Log.i(TAG, "login success " + accountname);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent = new Intent(LiveActivityEvent.this, SelectionActivity.class);
+                            intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                            Log.d("muser id ", accountname + " live event activity" );
+                            intent.putExtra("accountname", accountname);
+                            intent.putExtra("channel", test_channel);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(final ErrorInfo errorInfo) {
+                    Log.i(TAG, "login failed: " + errorInfo.getErrorCode());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mIsInChat = false;
+                            if(errorInfo.getErrorCode() == 8){
+                                Intent intent = new Intent(LiveActivityEvent.this, SelectionActivity.class);
+                                intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                                Log.d("muser id ", accountname + " live event activity" );
+                                intent.putExtra("accountname", accountname);
+                                intent.putExtra("channel", test_channel);
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
+                    });
+                }
+            });
+
+    }
+
+    private void doLogout() {
+        mRtmClient.logout(null);
+        MessageUtil.cleanMessageListBeanList();
     }
 }

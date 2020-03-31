@@ -23,12 +23,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.model.EventsModel;
+import densoftinfotechio.videocall.openlive.Constants;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 
 public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.MyViewHolder> {
@@ -38,7 +40,7 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
     private SharedPreferences preferences;
     private DatabaseReference databaseReference;
     private String activity = "";
-    SimpleDateFormat sdftime = new SimpleDateFormat("HH:mm");
+    SimpleDateFormat sdftime = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
     public EventsViewAdapter(Context context, ArrayList<EventsModel> eventsModels, String activity) {
         this.context = context;
@@ -69,10 +71,9 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
                 holder.tv_startevent.setVisibility(View.VISIBLE);
                 holder.tv_inviteascohost.setVisibility(View.VISIBLE);
                 holder.tv_inviteasaudience.setVisibility(View.VISIBLE);
-                //holder.tv_inviteascohost.setVisibility(View.GONE);
-                //holder.tv_inviteasaudience.setVisibility(View.GONE);
 
-                if (checktime(eventsModels.get(i).getFromTime())) {
+                if (checktimewithinrange(eventsModels.get(i).getEventDate(), eventsModels.get(i).getFromTime(),
+                eventsModels.get(i).getTotalTime())) {
                     holder.tv_startevent.setVisibility(View.VISIBLE);
                 } else {
                     holder.tv_startevent.setVisibility(View.INVISIBLE);
@@ -102,9 +103,6 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
 
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                        /*sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, kindly join the link as Co-Host " + "https://blog.ida.org.in/?doctor="+eventsModels.get(i).getEventId()
-                                + "&channel=" + eventsModels.get(i).getEventId() + "&type=Co-Host" + "&eventdate=" + eventsModels.get(i).getEventDate()
-                                + "&eventtime=" + eventsModels.get(i).getFromTime());*/
                 sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, kindly join the link as Co-Host " + "https://blog.ida.org.in/?channel="
                         + eventsModels.get(i).getEventId() + "&type=Co-Host");
                 sendIntent.setType("text/plain");
@@ -125,9 +123,6 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
 
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                        /*sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, kindly join the link as Audience " + "https://blog.ida.org.in/?doctor="+eventsModels.get(i).getEventId()
-                                + "&channel=" + eventsModels.get(i).getEventId() + "&type=Audience" + "&eventdate=" + eventsModels.get(i).getEventDate()
-                                + "&eventtime=" + eventsModels.get(i).getFromTime());*/
                 sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, kindly join the link as Audience " + "https://blog.ida.org.in/?channel="
                         + eventsModels.get(i).getEventId() + "&type=Audience");
                 sendIntent.setType("text/plain");
@@ -153,7 +148,6 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
                 HashMap<String, Object> param_update = new HashMap<>();
                 param_update.put("StartEvent", 1);
                 if (dataSnapshot.exists()) {
-
                     for (DataSnapshot user_requests : dataSnapshot.getChildren()) {
                         databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                                 .child(eventsModels.get(pos).getFromTime()).child("Co-Host").child(user_requests.getKey()).updateChildren(param_update);
@@ -167,6 +161,11 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
             }
         });
 
+        start_event(pos);
+
+    }
+
+    private void start_event(final int pos) {
         databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                 .child(eventsModels.get(pos).getFromTime()).child("Audience").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -175,10 +174,10 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
                 param_update.put("StartEvent", 1);
                 param_update.put("Status", 2); //audience
                 if (dataSnapshot.exists()) {
-
                     for (DataSnapshot user_requests : dataSnapshot.getChildren()) {
                         databaseReference.child("Events").child(String.valueOf(eventsModels.get(pos).getDoctorId())).child(eventsModels.get(pos).getEventDate())
                                 .child(eventsModels.get(pos).getFromTime()).child("Audience").child(user_requests.getKey()).updateChildren(param_update);
+                        densoftinfotechio.videocall.openlive.Constants.channel = eventsModels.get(pos).getEventId();
                     }
                 }
             }
@@ -188,7 +187,10 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
 
             }
         });
-        densoftinfotechio.videocall.openlive.Constants.channel = eventsModels.get(pos).getEventId();
+
+
+        Constants.doctorId = eventsModels.get(pos).getDoctorId();
+        densoftinfotechio.videocall.openlive.Constants.event_time = eventsModels.get(pos).getFromTime();
         Intent ilive = new Intent(context, MainActivity.class);
         ilive.putExtra("channelname", eventsModels.get(pos).getEventId());
         ilive.putExtra("type", "Host");
@@ -218,27 +220,60 @@ public class EventsViewAdapter extends RecyclerView.Adapter<EventsViewAdapter.My
         }
     }
 
-    private boolean checktime(String geteventtime) {
+    private boolean checktimewithinrange(String eventdate, String eventtime, long totaltime){
+        try {
+            Date time1 = sdftime.parse(eventdate + " " + eventtime);
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.setTime(time1);
+            //calendar1.add(Calendar.DATE, 1);
+
+            Date time2 = time1;
+            time2.setMinutes(time2.getMinutes() + (int)totaltime);
+            Calendar calendar2 = Calendar.getInstance();
+            calendar2.setTime(time2);
+            //calendar2.add(Calendar.DATE, 1);
+
+            Date d = sdftime.parse(sdftime.format(Calendar.getInstance().getTime()));
+            Calendar calendar3 = Calendar.getInstance();
+            calendar3.setTime(d);
+            //calendar3.add(Calendar.DATE, 1);
+            Log.d("value is ", true + "");
+            Date x = calendar3.getTime();
+            if (x.after(calendar1.getTime()) && x.before(calendar2.getTime())) {
+                Log.d("value is ", true + "");
+                return true;
+            }else{
+                Log.d("value is ", false + "");
+                return false;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /*private boolean checktime(String geteventtime, String eventDate) {
 
         Calendar c = Calendar.getInstance();
         String getcurrenttime = sdftime.format(c.getTime());
 
         try {
             Date current_time = sdftime.parse(getcurrenttime);
-            Date event_time = sdftime.parse(geteventtime);
+            Date event_time = sdftime.parse(eventDate + " " + geteventtime);
+            Log.d("current time is ", event_time.compareTo(current_time) + " event time " + event_time + " " + current_time);
 
-            if (current_time.before(event_time)) {
+            if (event_time.compareTo(current_time)<0) {
                 return false;
-            } else if (current_time.equals(event_time) || current_time.after(event_time)) {
+            } else if (event_time.compareTo(current_time)>0 || event_time.compareTo(current_time)==0) {
                 return true;
             } else {
                 return false;
             }
 
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-    }
+    }*/
 
 }

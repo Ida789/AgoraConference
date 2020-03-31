@@ -20,10 +20,5 @@
         android:icon="@drawable/holiday_calendar"
         app:showAsAction="always"/>
 
-    <item
-        android:id="@+id/accept_requests"
-        android:title="View Event"
-        android:icon="@drawable/ic_fav"
-        app:showAsAction="always"/>
 
 </menu>

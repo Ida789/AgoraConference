@@ -34,11 +34,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private LayoutInflater inflater;
     private Context context;
     String messageurl = "";
+    SpannableStringBuilder builder = new SpannableStringBuilder();
+
 
     public MessageAdapter(Context context, List<MessageBean> messageBeanList) {
         inflater = ((Activity) context).getLayoutInflater();
         this.messageBeanList = messageBeanList;
         this.context = context;
+        builder.append("Check out my location").append(" ");
+        builder.setSpan(new ImageSpan(context, R.drawable.google_map), builder.length() - 1, builder.length(), 0);
     }
 
     @Override
@@ -61,81 +65,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
     private void setupView(final MyViewHolder holder, final int position) {
 
-
         final MessageBean bean = messageBeanList.get(position);
-
         messageurl = bean.getMessage().replace("~image", "").replace("~video", "").replace("~location", "");
 
-        Log.d("message adapter ", messageurl);
-
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        builder.append("Check out my location").append(" ");
-        builder.setSpan(new ImageSpan(context, R.drawable.google_map),
-                builder.length() - 1, builder.length(), 0);
 
         if (bean.isBeSelf()) {
             holder.textViewSelfName.setText(bean.getAccount());
+            holder.tv_time_r.setVisibility(View.VISIBLE);
+            holder.tv_time_r.setText(bean.getTime().substring(0,bean.getTime().lastIndexOf(":")));
 
             if (bean.getMessage().contains("~image")) {
-                Picasso.with(context)
-                        .load(messageurl)
-                        .resize(200, 150)
-                        .centerCrop()
-                        .into(holder.iv_image_r);
-                holder.iv_image_r.setVisibility(View.VISIBLE);
-                holder.textViewSelfMsg.setVisibility(View.GONE);
-
-                holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                    .getMessage().replace("~image", "")
-                                    .replace("~video", ""), "image");
-
-                        /*Intent i = new Intent();
-                        i.setAction(Intent.ACTION_VIEW);
-                        Uri uri = Uri.parse(messageBeanList.get(position)
-                                .getMessage().replace("~image", "")
-                                .replace("~video", ""));
-                        i.setDataAndType(uri, "image/*");
-                        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        context.startActivity(Intent.createChooser(i, "Open With"));*/
-                    }
-                });
-
-
+                self_image(holder, position);
             } else if (bean.getMessage().contains("~video")) {
-                holder.iv_image_r.setVisibility(View.VISIBLE);
-                holder.textViewSelfMsg.setVisibility(View.GONE);
-                try {
-                    holder.iv_image_r.setImageBitmap(retriveVideoFrameFromVideo(messageurl));
-                    holder.iv_image_r.setBackgroundResource(R.drawable.playbutton);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-                holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                    .getMessage().replace("~image", "")
-                                    .replace("~video", ""), "video");
-                    }
-                });
-
+                self_video(holder, position);
             } else if (bean.getMessage().contains("~location")) {
-
-                holder.textViewSelfMsg.setText(builder);
-                holder.iv_image_r.setVisibility(View.GONE);
-                holder.textViewSelfMsg.setVisibility(View.VISIBLE);
-                holder.textViewSelfMsg.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getMessage().replace("I'm here ", "").replace("~location", "")));
-                        context.startActivity(intent);
-                    }
-                });
-
+                self_location(holder, bean);
             }else {
                 holder.textViewSelfMsg.setText(bean.getMessage());
                 holder.iv_image_r.setVisibility(View.GONE);
@@ -144,71 +88,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
         } else {
             holder.textViewOtherName.setText(bean.getAccount());
+            holder.tv_time_l.setVisibility(View.VISIBLE);
+            holder.tv_time_l.setText(bean.getTime().substring(0,bean.getTime().lastIndexOf(":")));
 
             if (bean.getMessage().contains("~image")) {
-                Picasso.with(context)
-                        .load(messageurl)
-                        .resize(100, 150)
-                        .centerCrop()
-                        .into(holder.iv_image_l);
-                holder.iv_image_l.setVisibility(View.VISIBLE);
-                holder.textViewOtherMsg.setVisibility(View.GONE);
-
-                holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                    .getMessage().replace("~image", "")
-                                    .replace("~video", ""), "image");
-
-
-
-                        /*Intent i = new Intent();
-                        i.setAction(Intent.ACTION_VIEW);
-                        Uri uri = Uri.parse(messageBeanList.get(position)
-                                .getMessage().replace("~image", "")
-                                .replace("~video", ""));
-                        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        i.setDataAndType(uri, "image/*");
-                        context.startActivity(Intent.createChooser(i, "Open With"));*/
-                    }
-                });
-
+                other_image(holder, position);
             } else if (bean.getMessage().contains("~video")) {
-                holder.iv_image_l.setVisibility(View.VISIBLE);
-                holder.textViewOtherMsg.setVisibility(View.GONE);
-
-                try {
-                    holder.iv_image_l.setImageBitmap(retriveVideoFrameFromVideo(messageurl));
-                    holder.iv_image_l.setBackgroundResource(R.drawable.playbutton);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-
-                holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-
-                            ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
-                                    .getMessage().replace("~image", "")
-                                    .replace("~video", ""), "video");
-
-                    }
-                });
+                other_video(holder, position);
             } else if (bean.getMessage().contains("~location")) {
-                holder.textViewOtherMsg.setText(builder);
-                holder.iv_image_l.setVisibility(View.GONE);
-                holder.textViewOtherMsg.setVisibility(View.VISIBLE);
-                holder.textViewOtherMsg.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getMessage().replace("I'm here ", "").replace("~location", "")));
-                        context.startActivity(intent);
-                    }
-                });
-
+                other_location(holder, bean);
             }else {
                 holder.textViewOtherMsg.setText(bean.getMessage());
                 holder.iv_image_l.setVisibility(View.GONE);
@@ -216,38 +104,128 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             }
 
             if (bean.getBackground() != 0) {
-                holder.textViewOtherName.setBackgroundResource(bean.getBackground());
+                holder.textViewOtherName.setTextColor(bean.getBackground());
             }
         }
 
         holder.layoutRight.setVisibility(bean.isBeSelf() ? View.VISIBLE : View.GONE);
         holder.layoutLeft.setVisibility(bean.isBeSelf() ? View.GONE : View.VISIBLE);
+    }
 
-
-        /*holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
+    private void other_location(MyViewHolder holder, final MessageBean bean) {
+        holder.textViewOtherMsg.setText(builder);
+        holder.iv_image_l.setVisibility(View.GONE);
+        holder.textViewOtherMsg.setVisibility(View.VISIBLE);
+        holder.textViewOtherMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getMessage().replace("I'm here ", "").replace("~location", "")));
+                context.startActivity(intent);
+            }
+        });
+    }
+
+    private void other_video(MyViewHolder holder, final int position) {
+        holder.iv_image_l.setVisibility(View.VISIBLE);
+        holder.textViewOtherMsg.setVisibility(View.GONE);
+
+        try {
+            holder.iv_image_l.setImageBitmap(retriveVideoFrameFromVideo(messageurl));
+            holder.iv_image_l.setBackgroundResource(R.drawable.playbutton);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
+                        .getMessage().replace("~image", "")
+                        .replace("~video", ""), "video");
+
+            }
+        });
+    }
+
+    private void other_image(MyViewHolder holder, final int position) {
+        Picasso.with(context)
+                .load(messageurl)
+                .resize(100, 150)
+                .centerCrop()
+                .into(holder.iv_image_l);
+        holder.iv_image_l.setVisibility(View.VISIBLE);
+        holder.textViewOtherMsg.setVisibility(View.GONE);
+
+        holder.iv_image_l.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
                 ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
                         .getMessage().replace("~image", "")
                         .replace("~video", ""), "image");
             }
         });
+    }
 
+    private void self_location(MyViewHolder holder, final MessageBean bean) {
+        holder.textViewSelfMsg.setText(builder);
+        holder.iv_image_r.setVisibility(View.GONE);
+        holder.textViewSelfMsg.setVisibility(View.VISIBLE);
+        holder.textViewSelfMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getMessage().replace("I'm here ", "").replace("~location", "")));
+                context.startActivity(intent);
+            }
+        });
+    }
+
+    private void self_video(MyViewHolder holder, final int position) {
+        holder.iv_image_r.setVisibility(View.VISIBLE);
+        holder.textViewSelfMsg.setVisibility(View.GONE);
+        try {
+            holder.iv_image_r.setImageBitmap(retriveVideoFrameFromVideo(messageurl));
+            holder.iv_image_r.setBackgroundResource(R.drawable.playbutton);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
         holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
                         .getMessage().replace("~image", "")
+                        .replace("~video", ""), "video");
+            }
+        });
+    }
+
+    private void self_image(MyViewHolder holder, final int position) {
+        Picasso.with(context)
+                .load(messageurl)
+                .resize(200, 150)
+                .centerCrop()
+                .into(holder.iv_image_r);
+        holder.iv_image_r.setVisibility(View.VISIBLE);
+        holder.textViewSelfMsg.setVisibility(View.GONE);
+
+        holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                ((MessageActivity) context).goto_showmedia_fragment(messageBeanList.get(position)
+                        .getMessage().replace("~image", "")
                         .replace("~video", ""), "image");
             }
-        });*/
+        });
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView textViewOtherName;
+        private TextView textViewOtherName, tv_time_l;
         private TextView textViewOtherMsg;
-        private TextView textViewSelfName;
+        private TextView textViewSelfName, tv_time_r;
         private TextView textViewSelfMsg;
         private RelativeLayout layoutLeft;
         private RelativeLayout layoutRight;
@@ -264,6 +242,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             layoutRight = itemView.findViewById(R.id.item_layout_r);
             iv_image_l = itemView.findViewById(R.id.iv_image_l);
             iv_image_r = itemView.findViewById(R.id.iv_image_r);
+            tv_time_r = itemView.findViewById(R.id.tv_time_r);
+            tv_time_l = itemView.findViewById(R.id.tv_time_l);
         }
     }
 

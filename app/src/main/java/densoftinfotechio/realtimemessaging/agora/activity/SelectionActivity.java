@@ -3,9 +3,9 @@ package densoftinfotechio.realtimemessaging.agora.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -36,7 +36,7 @@ public class SelectionActivity extends Activity {
     private ChatManager mChatManager;
     private RtmClient mRtmClient;
     private Bundle b;
-    int accountname = 0;
+    //int accountname = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +57,6 @@ public class SelectionActivity extends Activity {
         mChatButton = findViewById(R.id.selection_chat_btn);
         RadioGroup modeGroup = findViewById(R.id.mode_radio_group);
 
-        b = getIntent().getExtras();
-        if(b!=null && b.containsKey("friendname") && b.containsKey("accountname")){
-            mNameEditText.setText(String.valueOf(b.getInt("friendname")));
-            accountname = b.getInt("accountname", 0);
-            modeGroup.check(R.id.peer_radio_button);
-        }
-
         modeGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -78,19 +71,37 @@ public class SelectionActivity extends Activity {
                         mIsPeerToPeerMode = false;
                         mTitleTextView.setText(getString(R.string.title_channel_message));
                         mChatButton.setText(getString(R.string.btn_join));
-                        mNameEditText.setHint(getString(R.string.hint_channel));
+                        //mNameEditText.setHint(getString(R.string.hint_channel));
                         break;
                 }
             }
         });
-        RadioButton peerMode = findViewById(R.id.peer_radio_button);
-        peerMode.setChecked(true);
 
         mOfflineMsgCheck = findViewById(R.id.offline_msg_check);
         mOfflineMsgCheck.setChecked(true);
         mChatManager.enableOfflineMessage(true);
 
-        goto_message_actvity();
+        b = getIntent().getExtras();
+        if (b != null) {
+
+            if (b.containsKey("friendname") && b.containsKey("accountname")) {
+                mNameEditText.setText(String.valueOf(b.getInt("friendname")));
+                //accountname = b.getInt("accountname", 0);
+                RadioButton peerMode = findViewById(R.id.peer_radio_button);
+                peerMode.setChecked(true);
+                modeGroup.check(R.id.peer_radio_button);
+            } else if (b.containsKey("channel")) {
+                mNameEditText.setText(String.valueOf(b.getInt("channel", 0)));
+                //accountname = b.getInt("accountname", 0);
+                //Log.d("login success ", mNameEditText.getText().toString() + " account " + accountname);
+                RadioButton channelMode = findViewById(R.id.selection_tab_channel);
+                channelMode.setChecked(true);
+                modeGroup.check(R.id.selection_tab_channel);
+            }
+
+            goto_message_actvity();
+
+        }
 
         /*mOfflineMsgCheck.setChecked(mChatManager.isOfflineMessageEnabled());
         mOfflineMsgCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -102,11 +113,12 @@ public class SelectionActivity extends Activity {
     }
 
     public void onClickChat(View v) {
-        goto_message_actvity();
+        //goto_message_actvity();
     }
 
     private void goto_message_actvity() {
         mTargetName = mNameEditText.getText().toString();
+        Log.d("login selection ", mTargetName);
         if (mTargetName.equals("")) {
             showToast(getString(mIsPeerToPeerMode ? R.string.account_empty : R.string.channel_name_empty));
         } else if (mTargetName.length() >= MessageUtil.MAX_INPUT_NAME_LENGTH) {
@@ -119,17 +131,18 @@ public class SelectionActivity extends Activity {
             showToast(getString(R.string.account_cannot_be_yourself));
         } else {
             mChatButton.setEnabled(false);
-            jumpToMessageActivity(mTargetName);
+            jumpToMessageActivity();
         }
     }
 
-    private void jumpToMessageActivity(String friendname) {
+    private void jumpToMessageActivity() {
         Intent intent = new Intent(this, MessageActivity.class);
         intent.putExtra(MessageUtil.INTENT_EXTRA_IS_PEER_MODE, mIsPeerToPeerMode);
         intent.putExtra(MessageUtil.INTENT_EXTRA_TARGET_NAME, mTargetName);
         intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, mUserId);
-        intent.putExtra("accountname", accountname);
-        intent.putExtra("friendname", Integer.parseInt(friendname));
+        if (b.containsKey("istext")) {
+            intent.putExtra("istext", true);
+        }
         startActivityForResult(intent, CHAT_REQUEST_CODE);
         finish();
     }

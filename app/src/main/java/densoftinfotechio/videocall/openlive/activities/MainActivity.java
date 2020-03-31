@@ -253,8 +253,8 @@ public class MainActivity extends BaseActivity {
             Intent intent = new Intent(MainActivity.this, RoleActivity.class);
             String room = mTopicEdit.getText().toString();
             config().setChannelName(room);
-            intent.putExtra("channelname", b.getInt("channelname", 0));
-            intent.putExtra("type", b.getString("type")); //channelname and type for DeepLink flow
+            intent.putExtra("channelname", b.getInt("channelname", 0));//channelname and type for DeepLink flow
+            intent.putExtra("type", b.getString("type"));
             startActivity(intent);
             finish();
         }else if(b!=null && b.containsKey("channelname")){

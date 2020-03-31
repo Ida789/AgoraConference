@@ -82,14 +82,6 @@ public class AddEventActivity extends AppCompatActivity {
             }
         });
 
-
-        /*et_totime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                time_picker(c, 1);
-            }
-        });*/
-
         btn_addevent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -161,11 +153,11 @@ public class AddEventActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> event_param = new HashMap<>();
                 event_param.put("FromTime", event_time);
-                event_param.put("TotalTime", et_totime.getText().toString());
+                event_param.put("TotalTime", Long.parseLong(et_totime.getText().toString()));
                 event_param.put("EventName", et_eventname.getText().toString());
                 event_param.put("EventId", doctorid);
                 event_param.put("EventDate", event_date);
-                event_param.put("ExpectedAudience", et_audience.getText().toString());
+                event_param.put("ExpectedAudience", Long.parseLong(et_audience.getText().toString()));
                 event_param.put("DoctorId", doctorid);
 
                 if (!dataSnapshot.exists()) {

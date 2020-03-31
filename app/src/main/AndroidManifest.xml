@@ -20,10 +20,8 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
-        <activity android:name=".DisplayAllUsersInChannelActivity"></activity>
         <activity android:name="densoftinfotechio.GalleryItemsActivity" />
         <activity android:name="densoftinfotechio.ShowMediaActivity" />
-        <activity android:name="densoftinfotechio.RequestsActivity" />
         <activity android:name="densoftinfotechio.WaitingActivity" />
 
         <meta-data
@@ -99,7 +97,10 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="densoftinfotechio.PatientViewActivity"
-            android:windowSoftInputMode="stateHidden" /> <!-- Audio Call Activities -->
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- Audio Call Activities -->
         <activity
             android:name="densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -112,13 +113,17 @@
             android:launchMode="singleTask"
             android:parentActivityName="densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/FullscreenTheme" /> <!-- Screen Sharing Activities -->
+            android:theme="@style/FullscreenTheme" />
+
+        <!-- Screen Sharing Activities -->
         <activity
             android:name="densoftinfotechio.screenshare.app.BroadcasterActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="sensor" />
         <activity android:name="densoftinfotechio.screenshare.app.MainActivity" />
-        <activity android:name="densoftinfotechio.screenshare.app.AudienceActivity" /> <!-- RealTime Messaging Activities -->
+        <activity android:name="densoftinfotechio.screenshare.app.AudienceActivity" />
+
+        <!-- RealTime Messaging Activities -->
         <activity
             android:name="densoftinfotechio.realtimemessaging.agora.activity.LoginActivity"
             android:screenOrientation="sensorPortrait" />

@@ -81,6 +81,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if(c.moveToFirst()){
                 do{
                     JSONObject object = new JSONObject(c.getString(2)); //JSON_CHAT
+                    object.put("date", c.getString(3));
+                    object.put("time", c.getString(4));
                     Log.d("JSON CHAT object is ", object.toString()) ;
                     chat_list.put(object.toString());
                 }while (c.moveToNext());

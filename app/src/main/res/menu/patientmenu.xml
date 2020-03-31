@@ -8,10 +8,10 @@
         android:icon="@drawable/logout"
         app:showAsAction="always"/>
 
-    <item
+    <!--<item
         android:id="@+id/event"
         android:title="View Event"
         android:icon="@drawable/holiday_calendar"
-        app:showAsAction="always"/>
+        app:showAsAction="always"/>-->
 
 </menu>

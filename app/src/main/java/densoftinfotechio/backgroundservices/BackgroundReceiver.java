@@ -18,10 +18,17 @@ import java.util.HashMap;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
+import densoftinfotechio.AgoraApplication;
 import densoftinfotechio.DoctorViewActivity;
 import densoftinfotechio.PatientViewActivity;
 import densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity;
+import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
+import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
+import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
 import densoftinfotechio.videocall.openlive.Constants;
+import io.agora.rtm.ErrorInfo;
+import io.agora.rtm.ResultCallback;
+import io.agora.rtm.RtmClient;
 
 public class BackgroundReceiver extends BroadcastReceiver {
 
@@ -74,12 +81,6 @@ public class BackgroundReceiver extends BroadcastReceiver {
                                 databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(patient_id)).updateChildren(initiatecall);
                                 databaseReference.child("PatientList").child(String.valueOf(patient_id)).child(dateofcall).child(preferences.getString("id", "")).updateChildren(initiatecall);
 
-                                /*Intent i = new Intent(context, MainActivity.class);
-                                i.putExtra("channelname", channelname);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                }
-                                context.startActivity(i);*/
                                 Constants.channel = channelname;
                                 Constants.patientId = patient_id;
                                 Constants.doctorId = preferences.getInt("id", 0);
@@ -98,6 +99,8 @@ public class BackgroundReceiver extends BroadcastReceiver {
                                     i2.putExtra("channelname", channelname);
                                     context.startActivity(i2);
                                     ((DoctorViewActivity) context).finish();
+                                }else{
+                                    doLogin(context, patient_id, preferences.getInt("id",0));
                                 }
 
                             }
@@ -137,12 +140,12 @@ public class BackgroundReceiver extends BroadcastReceiver {
                         Intent i1 = new Intent(context, densoftinfotechio.videocall.openlive.activities.MainActivity.class);
                         i1.putExtra("channelname", channelname);
                         context.startActivity(i1);
-                        //((PatientViewActivity) context).finish();
                     } else if (sessiontype.trim().equalsIgnoreCase("Audio")) {
                         Intent i2 = new Intent(context, MainActivity.class);
                         i2.putExtra("channelname", channelname);
                         context.startActivity(i2);
-                        //((PatientViewActivity) context).finish();
+                    }else{
+                        doLogin(context, doctorid, preferences.getInt("id",0));
                     }
                 }
 
@@ -154,4 +157,55 @@ public class BackgroundReceiver extends BroadcastReceiver {
 
         }
     }
+
+    private void doLogin(final Context context, final int friendname, final int accountname) {
+        ChatManager mChatManager = AgoraApplication.the().getChatManager();
+        RtmClient mRtmClient = mChatManager.getRtmClient();
+        mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
+            @Override
+            public void onSuccess(Void responseInfo) {
+                Log.i("patient view", "login success");
+
+
+                class test extends Thread{
+                    @Override
+                    public void run() {
+                        Log.d("tttt", "test class thread is      >"+Thread.currentThread().getName());
+                        Intent intent = new Intent(context, SelectionActivity.class);
+                        intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                        Log.d("muser id ", accountname + " live activity" );
+                        intent.putExtra("friendname", friendname);
+                        intent.putExtra("accountname", accountname);
+                        intent.putExtra("istext", true);
+                        context.startActivity(intent);
+                    }
+                }
+
+                new test().start();
+
+            }
+
+            @Override
+            public void onFailure(final ErrorInfo errorInfo) {
+                Log.i("patient view ", "login failed: " + errorInfo.getErrorCode());
+
+                class test extends Thread{
+                    @Override
+                    public void run() {
+                        Log.d("tttt", "test class thread is      >"+Thread.currentThread().getName());
+                        Intent intent = new Intent(context, SelectionActivity.class);
+                        intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                        Log.d("muser id ", accountname + " live activity" );
+                        intent.putExtra("friendname", friendname);
+                        intent.putExtra("accountname", accountname);
+                        intent.putExtra("istext", true);
+                        context.startActivity(intent);
+                    }
+                }
+
+                new test().start();
+            }
+        });
+    }
+
 }

@@ -36,9 +36,7 @@ public class RoleActivity extends BaseActivity {
         if(b!=null && b.containsKey("type")){
             //deep link flow
 
-            if(b.getString("type","").equalsIgnoreCase("Host")) {
-                gotoLiveEventActivity(Constants.CLIENT_ROLE_BROADCASTER);
-            }else if(b.getString("type","").equalsIgnoreCase("Co-Host")){
+            if(b.getString("type","").equalsIgnoreCase("Host") || b.getString("type","").equalsIgnoreCase("Co-Host")) {
                 gotoLiveEventActivity(Constants.CLIENT_ROLE_BROADCASTER);
             }else if(b.getString("type","").equalsIgnoreCase("Audience")){
                 gotoLiveEventActivity(Constants.CLIENT_ROLE_AUDIENCE);
@@ -46,10 +44,8 @@ public class RoleActivity extends BaseActivity {
         }else if(b!=null && b.containsKey("channelname")){
             //normal flow
             gotoLiveActivity(Constants.CLIENT_ROLE_BROADCASTER);
-            Log.d("here flow ", "part 2 broadcaster");
         }else{
             gotoLiveActivity(Constants.CLIENT_ROLE_AUDIENCE);
-            Log.d("here flow ", "part 2 audience");
         }
     }
 
@@ -65,7 +61,6 @@ public class RoleActivity extends BaseActivity {
         //normal flow
         Intent intent = new Intent(getIntent());
         intent.putExtra(densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE, role);
-        Log.d("here flow ", "part 3 Role Activity");
         intent.setClass(getApplicationContext(), LiveActivity.class);
         startActivity(intent);
         finish();

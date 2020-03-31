@@ -3,6 +3,7 @@ package densoftinfotechio;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -22,9 +23,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 import densoftinfotechio.classes.Constants;
-import densoftinfotechio.realtimemessaging.agora.activity.LoginActivity;
+import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
+import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
+import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 import densoftinfotechio.agora.openlive.R;
+import io.agora.rtm.ErrorInfo;
+import io.agora.rtm.ResultCallback;
+import io.agora.rtm.RtmClient;
+
+import static densoftinfotechio.videocall.openlive.Constants.event_time;
 
 
 public class CallingActivity extends AppCompatActivity {
@@ -112,7 +120,7 @@ public class CallingActivity extends AppCompatActivity {
                                 HashMap<String, Object> initiatecall = new HashMap<>();
                                 initiatecall.put("InitiateCall", 2);
                                 databaseReference.child("DoctorList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(patient_id)).updateChildren(initiatecall);
-                                databaseReference.child("PatientList").child(String.valueOf(patient_id)).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
+                                //databaseReference.child("PatientList").child(String.valueOf(patient_id)).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
 
                                 //status 2 for call accepted, 3 for call rejected
 
@@ -129,20 +137,9 @@ public class CallingActivity extends AppCompatActivity {
                                     i.putExtra("channelname", channelname);
                                     startActivity(i);
                                     finish();
-                                }else if(sessiontype.trim().equalsIgnoreCase("Text")){
-                                    Intent i = new Intent(CallingActivity.this, LoginActivity.class);
-                                    i.putExtra("accountname", preferences.getInt("id", 0)); //doctor
-                                    i.putExtra("friendname", patient_id); //patient
-                                    startActivity(i);
-                                    finish();
+                                }else if(sessiontype.trim().equalsIgnoreCase("Text")) {
+                                    doLogin(patient_id, preferences.getInt("id", 0));
                                 }
-
-                                    /*}else {
-                                        Intent i = new Intent(CallingActivity.this, MainActivity.class);
-                                        startActivity(i);
-                                        finish();
-                                    }*/
-
                             }
 
                             @Override
@@ -175,11 +172,10 @@ public class CallingActivity extends AppCompatActivity {
                                 HashMap<String, Object> initiatecall = new HashMap<>();
                                 initiatecall.put("InitiateCall", 2);
                                 databaseReference.child("PatientList").child(String.valueOf(preferences.getInt("id", 0))).child(dateofcall).child(String.valueOf(doctorid)).updateChildren(initiatecall);
-                                databaseReference.child("DoctorList").child(String.valueOf(doctorid)).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
+                                //databaseReference.child("DoctorList").child(String.valueOf(doctorid)).child(dateofcall).child(String.valueOf(preferences.getInt("id", 0))).updateChildren(initiatecall);
                                 //status 2 for call accepted, 3 for call rejected
 
                                 //if(value.equalsIgnoreCase(2)){
-
                                 if(sessiontype.trim().equalsIgnoreCase("Video")){
                                     Intent i = new Intent(CallingActivity.this, MainActivity.class);
                                     i.putExtra("channelname", channelname);
@@ -191,19 +187,8 @@ public class CallingActivity extends AppCompatActivity {
                                     startActivity(i);
                                     finish();
                                 }else if(sessiontype.trim().equalsIgnoreCase("Text")){
-                                    Intent i = new Intent(CallingActivity.this, LoginActivity.class);
-                                    i.putExtra("accountname", preferences.getInt("id", 0)); //patient
-                                    i.putExtra("friendname", doctorid); //doctor
-                                    startActivity(i);
-                                    finish();
+                                    doLogin(doctorid, preferences.getInt("id", 0));
                                 }
-
-                                    /*}else {
-                                        Intent i = new Intent(CallingActivity.this, MainActivity.class);
-                                        startActivity(i);
-                                        finish();
-                                    }*/
-
                             }
 
                             @Override
@@ -220,5 +205,49 @@ public class CallingActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void doLogin(final int friendname, final int accountname) {
+        ChatManager mChatManager = AgoraApplication.the().getChatManager();
+        RtmClient mRtmClient = mChatManager.getRtmClient();
+        mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
+            @Override
+            public void onSuccess(Void responseInfo) {
+                Log.i("patient view", "login success");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(CallingActivity.this, SelectionActivity.class);
+                        intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                        Log.d("muser id ", accountname + " live activity" );
+                        intent.putExtra("friendname", friendname);
+                        intent.putExtra("accountname", accountname);
+                        intent.putExtra("istext", true);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(final ErrorInfo errorInfo) {
+                Log.i("patient view ", "login failed: " + errorInfo.getErrorCode());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(errorInfo.getErrorCode() ==8){
+                            Intent intent = new Intent(CallingActivity.this, SelectionActivity.class);
+                            intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                            Log.d("muser id ", accountname + " live activity" );
+                            intent.putExtra("friendname", friendname);
+                            intent.putExtra("accountname", accountname);
+                            intent.putExtra("istext", true);
+                            startActivity(intent);
+                        }
+
+                    }
+                });
+            }
+        });
     }
 }

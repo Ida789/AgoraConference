@@ -2,45 +2,37 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <RelativeLayout
         android:id="@+id/item_layout_l"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp">
+        android:layout_margin="5dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
         <TextView
             android:id="@+id/item_name_l"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:gravity="center"
-            android:textColor="@color/white"
-            android:ellipsize="end"
-            android:lines="1"
-            android:textSize="10dp"
-            android:background="@drawable/shape_circle_red"
-            />
+            android:textColor="@color/redish_axis"
+            android:textSize="12sp"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="3dp"/>
 
         <TextView
             android:id="@+id/item_msg_l"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="10dp"
+            android:padding="@dimen/padd_10"
             android:textColor="@color/black"
-            android:background="@drawable/icon_msg_l"
-            android:layout_toRightOf="@+id/item_name_l"
-            android:layout_centerVertical="true"
-            />
-
-        <!--<ImageView
-            android:id="@+id/iv_googlemap_l"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/item_msg_l"
-            android:layout_marginRight="20dp"
-            android:gravity="center"
-            android:padding="10dp"
-            android:background="@drawable/google_map"
-            android:visibility="gone"/>-->
+            android:background="@drawable/bubble_l"
+            android:layout_below="@+id/item_name_l"
+            android:layout_centerVertical="true" />
 
         <ImageView
             android:id="@+id/iv_image_l"
@@ -49,65 +41,84 @@
             android:gravity="center"
             android:padding="10dp"
             android:textColor="@color/black"
-            android:background="@drawable/icon_msg_l"
-            android:layout_toRightOf="@+id/item_name_l"
+            android:background="@drawable/bubble_l"
+            android:layout_below="@+id/item_name_l"
             android:layout_centerVertical="true"
             android:visibility="gone"/>
 
     </RelativeLayout>
-   <RelativeLayout
-       android:id="@+id/item_layout_r"
-       android:layout_width="300dp"
-       android:layout_height="wrap_content"
-       android:layout_alignParentRight="true"
-       android:layout_margin="10dp">
-       <TextView
-           android:id="@+id/item_name_r"
-           android:layout_width="40dp"
-           android:layout_height="40dp"
-           android:layout_alignParentRight="true"
-           android:gravity="center"
-           android:textColor="@color/white"
-           android:textSize="10dp"
-           android:background="@drawable/shape_circle_green"
-           />
 
-       <TextView
-           android:id="@+id/item_msg_r"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_toLeftOf="@+id/item_name_r"
-           android:gravity="center"
-           android:padding="10dp"
-           android:textColor="@color/white"
-           android:background="@drawable/icon_msg_r"
-           android:layout_centerVertical="true"
-           />
 
-       <!--<ImageView
-           android:id="@+id/iv_googlemap_r"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_toLeftOf="@+id/item_msg_r"
-           android:layout_marginRight="20dp"
-           android:gravity="center"
-           android:padding="10dp"
-           android:background="@drawable/google_map"
-           android:visibility="gone"/>-->
+    <TextView
+        android:id="@+id/tv_time_l"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_below="@id/item_layout_l"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"
+        android:textSize="12sp"/>
 
-       <ImageView
-           android:id="@+id/iv_image_r"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_toLeftOf="@+id/item_name_r"
-           android:gravity="center"
-           android:padding="10dp"
-           android:textColor="@color/white"
-           android:background="@drawable/icon_msg_r"
-           android:layout_centerVertical="true"
-           android:visibility="gone"/>
+    <RelativeLayout
+        android:id="@+id/item_layout_r"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="5dp"
+        android:layout_alignParentEnd="true">
 
-   </RelativeLayout>
+        <TextView
+            android:id="@+id/item_name_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:textColor="@color/redish_axis"
+            android:textSize="12sp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="3dp"/>
 
+        <TextView
+            android:id="@+id/item_msg_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_below="@+id/item_name_r"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/bubble_r"
+            android:lineSpacingExtra="2dp"
+            android:padding="@dimen/padd_10"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/iv_image_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_below="@+id/item_name_r"
+            android:background="@drawable/bubble_r"
+            android:gravity="center"
+            android:padding="10dp"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            android:layout_alignParentRight="true"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_time_r"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_below="@id/item_layout_r"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:textSize="12sp"
+        android:visibility="gone"/>
 
 </RelativeLayout>

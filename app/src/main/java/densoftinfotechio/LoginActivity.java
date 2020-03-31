@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 import densoftinfotechio.agora.openlive.R;
+import densoftinfotechio.videocall.openlive.Constants;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -53,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         tv_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //testing purpose - id from 2000-4000 are doctorIds and remaining are for patients
+                //testing purpose - id from 2000-4000 are doctorIds and remaining are for patients. Replace it
                 if (!et_id.getText().toString().trim().equals("")) {
                     if (Integer.parseInt(et_id.getText().toString()) >= 2000 && Integer.parseInt(et_id.getText().toString()) <= 4000) {
                         edit.putBoolean("logindoctor", true);
@@ -88,13 +89,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private boolean permissionGranted(String permission) {
-        return ContextCompat.checkSelfPermission(
-                this, permission) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQ_CODE);
-    }
 
     private void checkPermission() {
         boolean granted = true;
@@ -124,11 +121,6 @@ public class LoginActivity extends AppCompatActivity {
             }
 
         });
-        /*alert.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });*/
 
         alert.show();
     }
@@ -142,16 +134,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void check_deeplinking() {
-
-
         Intent in = getIntent();
         Uri data = in.getData();
 
-
         if (preferences != null && preferences.contains("logindoctor")) {
             if (preferences.getBoolean("logindoctor", false)) {
-
                 Intent i = new Intent(LoginActivity.this, DoctorViewActivity.class);
+                Constants.doctorId = preferences.getInt("id", 0);
                 startActivity(i);
                 finish();
 
@@ -160,10 +149,6 @@ public class LoginActivity extends AppCompatActivity {
         } else if (preferences != null && preferences.contains("loginpatient")) {
             if (preferences.getBoolean("loginpatient", false)) {
                 if (data != null) {
-                    Log.d("deeplinking   :- ", data + "");
-
-                    //Uri data1 = this.getIntent().getData();
-                    //if (data1 != null && data1.isHierarchical()) {
                     String uri = this.getIntent().getDataString();
                     Log.i("MyApp", "Deep link clicked " + uri); //https://blog.ida.org.in/?channel=3000&type=Co-Host
 
@@ -175,12 +160,13 @@ public class LoginActivity extends AppCompatActivity {
                             Intent i = new Intent(LoginActivity.this, WaitingActivity.class);
                             i.putExtra("channelname", Integer.parseInt(data_replace.split("&")[0]));
                             i.putExtra("type", data_replace.split("&")[1]);
-                            i.putExtra("doctor", 3000);
+                            i.putExtra("doctor", Integer.parseInt(data_replace.split("&")[0]));
+                            Constants.doctorId = Integer.parseInt(data_replace.split("&")[0]);
+                            Constants.type = data_replace.split("&")[1];
                             startActivity(i);
                             finish();
                         }
                     }
-                    //}
 
                 } else {
                     Intent i = new Intent(LoginActivity.this, PatientViewActivity.class);

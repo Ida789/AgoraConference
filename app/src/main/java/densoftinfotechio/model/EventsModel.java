@@ -9,7 +9,7 @@ public class EventsModel {
     private int EventId = 0;
     private String EventName = "";
     private String FromTime = "";
-    private String TotalTime = "";
+    private long TotalTime = 0;
     private long ExpectedAudience = 0;
 
     public EventsModel(){
@@ -56,11 +56,11 @@ public class EventsModel {
         FromTime = fromTime;
     }
 
-    public String getTotalTime() {
+    public long getTotalTime() {
         return TotalTime;
     }
 
-    public void setTotalTime(String totalTime) {
+    public void setTotalTime(long totalTime) {
         TotalTime = totalTime;
     }
 

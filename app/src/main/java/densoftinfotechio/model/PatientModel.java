@@ -10,7 +10,7 @@ public class PatientModel {
     private String SessionTime = "";
     private String SessionType = "";
     private int InitiateCall = 0;
-    private String Talktime = "";
+    private int Talktime = 0;
 
     public PatientModel() {
     }
@@ -87,11 +87,11 @@ public class PatientModel {
         InitiateCall = initiateCall;
     }
 
-    public String getTalktime() {
+    public int getTalktime() {
         return Talktime;
     }
 
-    public void setTalktime(String talktime) {
+    public void setTalktime(int talktime) {
         Talktime = talktime;
     }
 }

@@ -1,8 +1,11 @@
 package densoftinfotechio.realtimemessaging.agora.utils;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import densoftinfotechio.agora.openlive.R;
@@ -21,13 +24,24 @@ public class MessageUtil {
     public static Random RANDOM = new Random();
 
     public static final int[] COLOR_ARRAY = new int[] {
-            R.drawable.shape_circle_black,
+            /*R.drawable.shape_circle_black,
             R.drawable.shape_circle_blue,
             R.drawable.shape_circle_pink,
             R.drawable.shape_circle_pink_dark,
             R.drawable.shape_circle_yellow,
-            R.drawable.shape_circle_red
+            R.drawable.shape_circle_red*/
+            R.color.green,
+            R.color.blue,
+            R.color.pink,
+            R.color.pink_dark,
+            R.color.yellow,
+            R.color.red
+
     };
+
+    private static SimpleDateFormat sdf_date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+    private static SimpleDateFormat sdf_time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+    private static Calendar c;
 
     private static List<MessageListBean> messageListBeanList = new ArrayList<>();
 
@@ -60,7 +74,7 @@ public class MessageUtil {
     }
 
     public static void addMessageBean(String account, String msg) {
-        MessageBean messageBean = new MessageBean(account, msg, false);
+        MessageBean messageBean = new MessageBean(account, msg, false, getCurrentDate(), getCurrentTime());
         int ret = existMessageListBean(account);
         if (ret == -1) {
             // account not exist new messagelistbean
@@ -82,5 +96,15 @@ public class MessageUtil {
             bean.setMessageBeanList(messageBeanList);
             messageListBeanList.add(bean);
         }
+    }
+
+    public static String getCurrentDate(){
+        c = Calendar.getInstance();
+        return sdf_date.format(c.getTime());
+    }
+
+    public static String getCurrentTime(){
+        c = Calendar.getInstance();
+        return sdf_time.format(c.getTime());
     }
 }

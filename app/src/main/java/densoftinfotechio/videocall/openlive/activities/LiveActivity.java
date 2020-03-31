@@ -20,11 +20,10 @@ import densoftinfotechio.AgoraApplication;
 import densoftinfotechio.DoctorViewActivity;
 import densoftinfotechio.PatientViewActivity;
 import densoftinfotechio.agora.openlive.R;
-import densoftinfotechio.realtimemessaging.agora.activity.LoginActivity;
 import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
-import densoftinfotechio.screenshare.app.BroadcasterActivity;
+
 import densoftinfotechio.videocall.openlive.stats.LocalStatsData;
 import densoftinfotechio.videocall.openlive.stats.RemoteStatsData;
 import densoftinfotechio.videocall.openlive.stats.StatsData;
@@ -248,12 +247,12 @@ public class LiveActivity extends RtcBaseActivity {
     @Override
     public void finish() {
         super.finish();
-        statsManager().clearAllData();
+        //statsManager().clearAllData();
     }
 
     public void onLeaveClicked(View view) {
 
-        if (sharedPreferences != null && sharedPreferences.contains("logindoctor")) {
+        /*if (sharedPreferences != null && sharedPreferences.contains("logindoctor")) {
             Intent i = new Intent(LiveActivity.this, DoctorViewActivity.class);
             startActivity(i);
             finish();
@@ -263,7 +262,7 @@ public class LiveActivity extends RtcBaseActivity {
             startActivity(i);
             finish();
         }
-        statsManager().clearAllData();
+        statsManager().clearAllData();*/
     }
 
     public void onSwitchCameraClicked(View view) {
@@ -320,6 +319,8 @@ public class LiveActivity extends RtcBaseActivity {
     @Override
     public void onBackPressed() {
         try {
+            statsManager().clearAllData();
+            doLogout();
             if (sharedPreferences != null && sharedPreferences.contains("logindoctor")) {
                 Intent i = new Intent(LiveActivity.this, DoctorViewActivity.class);
                 startActivity(i);
@@ -329,13 +330,7 @@ public class LiveActivity extends RtcBaseActivity {
                 startActivity(i);
                 finish();
             }
-            statsManager().clearAllData();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            mRtmClient.logout(null);
-            MessageUtil.cleanMessageListBeanList();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -343,8 +338,8 @@ public class LiveActivity extends RtcBaseActivity {
     }
 
     public void onScreenSharingClicked(View view) {
-        Intent i = new Intent(LiveActivity.this, BroadcasterActivity.class);
-        startActivity(i);
+        //Intent i = new Intent(LiveActivity.this, BroadcasterActivity.class);
+        //startActivity(i);
     }
 
 
@@ -359,6 +354,7 @@ public class LiveActivity extends RtcBaseActivity {
                     public void run() {
                         Intent intent = new Intent(LiveActivity.this, SelectionActivity.class);
                         intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                        Log.d("muser id ", accountname + " live activity" );
                         intent.putExtra("friendname", friendname);
                         intent.putExtra("accountname", accountname);
                         startActivity(intent);
@@ -368,12 +364,22 @@ public class LiveActivity extends RtcBaseActivity {
             }
 
             @Override
-            public void onFailure(ErrorInfo errorInfo) {
+            public void onFailure(final ErrorInfo errorInfo) {
                 Log.i(TAG, "login failed: " + errorInfo.getErrorCode());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         mIsInChat = false;
+                        if(errorInfo.getErrorCode() ==8){
+                            Intent intent = new Intent(LiveActivity.this, SelectionActivity.class);
+                            intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                            Log.d("muser id ", accountname + " live activity" );
+                            intent.putExtra("friendname", friendname);
+                            intent.putExtra("accountname", accountname);
+                            startActivity(intent);
+                            finish();
+                        }
+
                     }
                 });
             }

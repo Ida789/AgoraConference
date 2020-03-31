@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="densoftinfotechio.PatientViewActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorPrimary">
 
     <TextView
         android:id="@+id/tv_bookappointment"
@@ -33,7 +34,8 @@
             android:layout_gravity="center"
             android:padding="10dp"
             android:enabled="false"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tv_search"
@@ -51,7 +53,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_patient"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         tools:listitem="@layout/patientview_layout"/>
 
 </LinearLayout>

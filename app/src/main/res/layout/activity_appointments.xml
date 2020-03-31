@@ -17,21 +17,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="Enter doctor id"
-            android:inputType="number" />
+            android:inputType="number"
+            android:background="@drawable/rounded_edittext"
+            android:padding="@dimen/padd_10"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"/>
 
-        <EditText
-            android:id="@+id/et_date"
+        <TextView
+            android:id="@+id/tv_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select date"
+            android:text="Select date to check available slots"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:layout_gravity="center"
-            android:background="@color/white"
+            android:background="@color/blue"
             android:layout_marginLeft="20dp"
-            android:focusable="false"/>
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
 
         <EditText
             android:id="@+id/et_patient_id"
@@ -76,7 +81,8 @@
             android:maxLength="2"
             android:text="17"
             android:textAlignment="center"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:gravity="center_horizontal" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -93,7 +99,8 @@
             android:maxLength="2"
             android:text="12"
             android:textAlignment="center"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:gravity="center_horizontal" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -110,7 +117,8 @@
             android:maxLength="4"
             android:text="2019"
             android:textAlignment="center"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:gravity="center_horizontal" />
 
     </LinearLayout>
 
@@ -125,7 +133,8 @@
         android:textColor="@color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        android:padding="3dp"/>
+        android:padding="3dp"
+        android:gravity="center_horizontal" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_morningsessions"
@@ -143,7 +152,8 @@
         android:textColor="@color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        android:padding="3dp"/>
+        android:padding="3dp"
+        android:gravity="center_horizontal" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_afternoonsessions"
@@ -161,7 +171,8 @@
         android:textColor="@color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textStyle="bold"
-        android:padding="3dp"/>
+        android:padding="3dp"
+        android:gravity="center_horizontal" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_eveningsessions"
@@ -169,39 +180,5 @@
         android:layout_height="0dp"
         android:background="@color/Gray600"
         android:layout_weight="1"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tv_doctor"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Doctor"
-            android:gravity="center"
-            android:textColor="@color/gridcolor_2"
-            android:padding="15dp"/>
-
-        <View
-            android:layout_width="2dp"
-            android:layout_height="match_parent"
-            android:background="@color/Gray600"/>
-
-
-        <TextView
-            android:id="@+id/tv_patient"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Patient"
-            android:gravity="center"
-            android:textColor="@color/yellow"
-            android:padding="15dp"/>
-
-    </LinearLayout>
 
 </LinearLayout>

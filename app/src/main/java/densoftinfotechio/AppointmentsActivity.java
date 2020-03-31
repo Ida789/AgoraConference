@@ -40,11 +40,10 @@ import densoftinfotechio.agora.openlive.R;
 
 public class AppointmentsActivity extends AppCompatActivity {
 
-    TextView close, tv_book, tv_findslots;
-    TextView tv_doctor, tv_patient;
+    TextView close, tv_book, tv_findslots, tv_date;
     RadioButton rb_text, rb_audio, rb_video;
     RadioGroup rg_booking;
-    EditText et_patient_id, et_doctor_id, et_day, et_month, et_year, et_date;
+    EditText et_patient_id, et_doctor_id, et_day, et_month, et_year;
     RecyclerView recyclerview_morningsessions, recyclerview_afternoonsessions, recyclerview_eveningsessions;
     RecyclerView.LayoutManager layoutManager, layoutManager1, layoutManager2;
     AppointmentAdapter appointmentAdapter;
@@ -53,12 +52,11 @@ public class AppointmentsActivity extends AppCompatActivity {
     String text = "", time = "";
     AlertDialog alertDialog = null;
     String day = "";
-    //ArrayList<DoctorScheduleModel> doctorScheduleModels = new ArrayList<>();
     ArrayList<DoctorScheduleModel> doctorScheduleModels_morning = new ArrayList<>();
     ArrayList<DoctorScheduleModel> doctorScheduleModels_afternoon = new ArrayList<>();
     ArrayList<DoctorScheduleModel> doctorScheduleModels_evening = new ArrayList<>();
     SharedPreferences preferences;
-    int day_cal =0, month_cal=0, year_cal=0;
+    int day_cal = 0, month_cal = 0, year_cal = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,10 +73,8 @@ public class AppointmentsActivity extends AppCompatActivity {
         et_day = findViewById(R.id.et_day);
         et_month = findViewById(R.id.et_month);
         et_year = findViewById(R.id.et_year);
-        tv_doctor = findViewById(R.id.tv_doctor);
-        tv_patient = findViewById(R.id.tv_patient);
         tv_findslots = findViewById(R.id.tv_findslots);
-        et_date = findViewById(R.id.et_date);
+        tv_date = findViewById(R.id.tv_date);
 
         databaseReference = FirebaseDatabase.getInstance().getReference(Constants.firebasedatabasename);
 
@@ -90,11 +86,11 @@ public class AppointmentsActivity extends AppCompatActivity {
         recyclerview_afternoonsessions.setLayoutManager(layoutManager1);
         recyclerview_eveningsessions.setLayoutManager(layoutManager2);
 
-        if(preferences!=null && preferences.contains("id")){
+        if (preferences != null && preferences.contains("id")) {
             et_patient_id.setText(String.valueOf(preferences.getInt("id", 0)));
         }
 
-        et_date.setOnClickListener(new View.OnClickListener() {
+        tv_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Calendar c = Calendar.getInstance();
@@ -105,15 +101,15 @@ public class AppointmentsActivity extends AppCompatActivity {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(AppointmentsActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        et_date.setText(day + "-" + (month+1) + "-" + year);
+                        tv_date.setText(day + "-" + (month + 1) + "-" + year);
 
-                        if(!et_doctor_id.getText().toString().trim().equals("")) {
-                            if (!et_date.getText().toString().trim().equals("")) {
+                        if (!et_doctor_id.getText().toString().trim().equals("")) {
+                            if (!tv_date.getText().toString().trim().equals("")) {
                                 find_available_slots();
                             } else {
                                 Toast.makeText(AppointmentsActivity.this, "Please select the date", Toast.LENGTH_SHORT).show();
                             }
-                        }else{
+                        } else {
                             Toast.makeText(AppointmentsActivity.this, "Enter the Doctor Id", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -121,22 +117,6 @@ public class AppointmentsActivity extends AppCompatActivity {
 
                 datePickerDialog.show();
 
-            }
-        });
-
-        tv_doctor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(AppointmentsActivity.this, DoctorViewActivity.class);
-                startActivity(i);
-            }
-        });
-
-        tv_patient.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(AppointmentsActivity.this, PatientViewActivity.class);
-                startActivity(i);
             }
         });
 
@@ -193,7 +173,7 @@ public class AppointmentsActivity extends AppCompatActivity {
     private void alert_confirmBooking(String time) {
         AlertDialog.Builder alert = new AlertDialog.Builder(AppointmentsActivity.this);
         alert.setTitle("Confirm Booking");
-        alert.setMessage("Do you want to confirm your " + text + " booking for " + (et_date.getText().toString()) + " at " + time);
+        alert.setMessage("Do you want to confirm your " + text + " booking for " + (tv_date.getText().toString()) + " at " + time);
         alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -216,27 +196,28 @@ public class AppointmentsActivity extends AppCompatActivity {
 
     private void addtofirebase() {
 
-       databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(et_date.getText().toString()).child(et_patient_id.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString()).child(et_patient_id.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 HashMap<String, Object> object = new HashMap<>();
                 object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("Day", day);
-                object.put("Date",et_date.getText().toString());
+                object.put("Date", tv_date.getText().toString());
                 object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
                 object.put("SessionTime", time);
                 object.put("SessionType", text);
                 object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
                 object.put("InitiateCall", 0);
-                object.put("Talktime", "15");
+                object.put("Talktime", 15);
 
-                //FirebaseAppointmentModel firebaseAppointmentModel = new FirebaseAppointmentModel(text, time, et_patient_id.getText().toString(), getDay(et_day.getText().toString() + "-" + et_month.getText().toString() + "-" + et_year.getText().toString()));
                 if (!dataSnapshot.exists()) {
-                    databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(et_date.getText().toString()).child(et_patient_id.getText().toString()).setValue(object);
+                    databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString())
+                            .child(et_patient_id.getText().toString()).setValue(object);
                 } else {
 
-                    databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(et_date.getText().toString()).child(et_patient_id.getText().toString()).updateChildren(object);
+                    databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString())
+                            .child(et_patient_id.getText().toString()).updateChildren(object);
                 }
             }
 
@@ -252,20 +233,22 @@ public class AppointmentsActivity extends AppCompatActivity {
                 HashMap<String, Object> object = new HashMap<>();
                 object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("Day", day);
-                object.put("Date",et_date.getText().toString());
+                object.put("Date", tv_date.getText().toString());
                 object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
                 object.put("SessionTime", time);
                 object.put("SessionType", text);
                 object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
                 object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
                 object.put("InitiateCall", 0);
-                object.put("Talktime", "15");
+                object.put("Talktime", 15);
 
                 //FirebaseAppointmentModel firebaseAppointmentModel = new FirebaseAppointmentModel(text, time, et_patient_id.getText().toString(), getDay(et_day.getText().toString() + "-" + et_month.getText().toString() + "-" + et_year.getText().toString()));
                 if (!dataSnapshot.exists()) {
-                    databaseReference.child("PatientList").child(et_patient_id.getText().toString()).child(et_date.getText().toString()).child(et_doctor_id.getText().toString()).setValue(object);
+                    databaseReference.child("PatientList").child(et_patient_id.getText().toString())
+                            .child(tv_date.getText().toString()).child(et_doctor_id.getText().toString()).setValue(object);
                 } else {
-                    databaseReference.child("PatientList").child(et_patient_id.getText().toString()).child(et_date.getText().toString()).child(et_doctor_id.getText().toString()).updateChildren(object);
+                    databaseReference.child("PatientList").child(et_patient_id.getText().toString())
+                            .child(tv_date.getText().toString()).child(et_doctor_id.getText().toString()).updateChildren(object);
                 }
             }
 
@@ -324,13 +307,13 @@ public class AppointmentsActivity extends AppCompatActivity {
         return dayofweek;
     }
 
-    private void find_available_slots(){
+    private void find_available_slots() {
         //doctorScheduleModels.clear();
 
         doctorScheduleModels_morning.clear();
         doctorScheduleModels_afternoon.clear();
         doctorScheduleModels_evening.clear();
-        day = getDay(et_date.getText().toString());
+        day = getDay(tv_date.getText().toString());
 
         databaseReference.child("Doctor-Schedule").child(et_doctor_id.getText().toString()).child(day).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -342,7 +325,7 @@ public class AppointmentsActivity extends AppCompatActivity {
 
                     for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",").length; i++) {
                         Log.d("val ", dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i]);
-                        doctorScheduleModels_morning.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i] , 1));
+                        doctorScheduleModels_morning.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i], 1));
                     }
 
                     for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getAfternoonShift().split(",").length; i++) {
@@ -354,12 +337,12 @@ public class AppointmentsActivity extends AppCompatActivity {
                     }
 
                     //if (doctorScheduleModels != null) {
-                        appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_morning, 1);
-                        recyclerview_morningsessions.setAdapter(appointmentAdapter);
-                        appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_afternoon, 2);
-                        recyclerview_afternoonsessions.setAdapter(appointmentAdapter);
-                        appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_evening, 3);
-                        recyclerview_eveningsessions.setAdapter(appointmentAdapter);
+                    appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_morning, 1);
+                    recyclerview_morningsessions.setAdapter(appointmentAdapter);
+                    appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_afternoon, 2);
+                    recyclerview_afternoonsessions.setAdapter(appointmentAdapter);
+                    appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_evening, 3);
+                    recyclerview_eveningsessions.setAdapter(appointmentAdapter);
                     //}
 
 

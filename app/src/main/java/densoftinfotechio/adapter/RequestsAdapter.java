@@ -33,24 +33,25 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        holder.tv_patientid.setText(requestsModels.get(position).getPatientId());
+        holder.tv_patientid.setText(requestsModels.get(position).getPatientId() + "");
 
         if(requestsModels.get(position).getStatus() == 1){
             accepted(holder);
         }else if(requestsModels.get(position).getStatus() == 2){
             denied(holder);
         }
+
         holder.tv_accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((LiveActivityEvent)context).call_status("1", requestsModels.get(position).getPatientId()); //accept
+                ((LiveActivityEvent)context).call_status(1, requestsModels.get(position).getPatientId()); //accept
                 accepted(holder);
             }
         });
         holder.tv_deny.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((LiveActivityEvent)context).call_status("2", requestsModels.get(position).getPatientId()); //reject
+                ((LiveActivityEvent)context).call_status(2, requestsModels.get(position).getPatientId()); //reject
                 denied(holder);
             }
         });
