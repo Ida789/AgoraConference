@@ -139,7 +139,7 @@ public class PatientViewAdapter extends RecyclerView.Adapter<PatientViewAdapter.
             if (x.after(calendar1.getTime()) && x.before(calendar2.getTime())) {
                 Log.d("value is ", true + "");
                 return true;
-            } else if(x.before(calendar2.getTime())){
+            } else if(x.after(calendar1.getTime())){
                 holder.tv_status.setText("Missed");
                 holder.tv_status.setEnabled(false);
                 return false;

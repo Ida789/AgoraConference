@@ -98,9 +98,7 @@
         <activity
             android:name="densoftinfotechio.PatientViewActivity"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="stateHidden" />
-
-        <!-- Audio Call Activities -->
+            android:windowSoftInputMode="stateHidden" /> <!-- Audio Call Activities -->
         <activity
             android:name="densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -113,17 +111,13 @@
             android:launchMode="singleTask"
             android:parentActivityName="densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/FullscreenTheme" />
-
-        <!-- Screen Sharing Activities -->
+            android:theme="@style/FullscreenTheme" /> <!-- Screen Sharing Activities -->
         <activity
             android:name="densoftinfotechio.screenshare.app.BroadcasterActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="sensor" />
         <activity android:name="densoftinfotechio.screenshare.app.MainActivity" />
-        <activity android:name="densoftinfotechio.screenshare.app.AudienceActivity" />
-
-        <!-- RealTime Messaging Activities -->
+        <activity android:name="densoftinfotechio.screenshare.app.AudienceActivity" /> <!-- RealTime Messaging Activities -->
         <activity
             android:name="densoftinfotechio.realtimemessaging.agora.activity.LoginActivity"
             android:screenOrientation="sensorPortrait" />

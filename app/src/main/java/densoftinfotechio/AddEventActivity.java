@@ -25,6 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.classes.Constants;
+import densoftinfotechio.utilities.InternetUtils;
+import densoftinfotechio.utilities.Loader;
 
 public class AddEventActivity extends AppCompatActivity {
 
@@ -148,34 +150,41 @@ public class AddEventActivity extends AppCompatActivity {
     }
 
     private void add_event_to_firebase(final int doctorid, final String event_date, final String event_time) {
-        databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                HashMap<String, Object> event_param = new HashMap<>();
-                event_param.put("FromTime", event_time);
-                event_param.put("TotalTime", Long.parseLong(et_totime.getText().toString()));
-                event_param.put("EventName", et_eventname.getText().toString());
-                event_param.put("EventId", doctorid);
-                event_param.put("EventDate", event_date);
-                event_param.put("ExpectedAudience", Long.parseLong(et_audience.getText().toString()));
-                event_param.put("DoctorId", doctorid);
+        final Loader loader = new Loader(AddEventActivity.this);
+        if(InternetUtils.getInstance(AddEventActivity.this).available()){
+            databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    HashMap<String, Object> event_param = new HashMap<>();
+                    event_param.put("FromTime", event_time);
+                    event_param.put("TotalTime", Long.parseLong(et_totime.getText().toString()));
+                    event_param.put("EventName", et_eventname.getText().toString());
+                    event_param.put("EventId", doctorid);
+                    event_param.put("EventDate", event_date);
+                    event_param.put("ExpectedAudience", Long.parseLong(et_audience.getText().toString()));
+                    event_param.put("DoctorId", doctorid);
 
-                if (!dataSnapshot.exists()) {
-                    databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).child(event_time).setValue(event_param);
-                    Toast.makeText(getApplicationContext(), "Event Added", Toast.LENGTH_SHORT).show();
-                } else {
-                    databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).child(event_time).updateChildren(event_param);
-                    Toast.makeText(getApplicationContext(), "Event Updated", Toast.LENGTH_SHORT).show();
+                    loader.dismissLoader();
+                    if (!dataSnapshot.exists()) {
+                        databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).child(event_time).setValue(event_param);
+                        Toast.makeText(getApplicationContext(), "Event Added", Toast.LENGTH_SHORT).show();
+                    } else {
+                        databaseReference.child("Events").child(String.valueOf(doctorid)).child(event_date).child(event_time).updateChildren(event_param);
+                        Toast.makeText(getApplicationContext(), "Event Updated", Toast.LENGTH_SHORT).show();
+
+                    }
+                    clear_data();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-                clear_data();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+            });
+        }else{
+            loader.dismissLoader();
+            Toast.makeText(AddEventActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void clear_data() {

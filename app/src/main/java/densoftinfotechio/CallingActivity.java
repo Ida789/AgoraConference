@@ -26,6 +26,8 @@ import densoftinfotechio.classes.Constants;
 import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
+import densoftinfotechio.utilities.InternetUtils;
+import densoftinfotechio.utilities.Loader;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 import densoftinfotechio.agora.openlive.R;
 import io.agora.rtm.ErrorInfo;
@@ -43,6 +45,7 @@ public class CallingActivity extends AppCompatActivity {
     private Bundle b;
     private DatabaseReference databaseReference;
     private SharedPreferences preferences;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,38 +65,46 @@ public class CallingActivity extends AppCompatActivity {
 //if(b.getString("sessiontype").trim().equalsIgnoreCase("Video"))
         b = getIntent().getExtras();
         if (b != null && b.containsKey("patientid") && b.containsKey("channelname") && b.containsKey("sessiontype")) {
-            if(b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
+            if (b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
                 tv_patientid.setText(getResources().getString(R.string.receiving_videocall_patientid) + " " + b.getInt("patientid", 0));
-            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Audio")){
+            } else if (b.getString("sessiontype").trim().equalsIgnoreCase("Audio")) {
                 tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_patientid) + " " + b.getInt("patientid", 0));
-            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Text")){
+            } else if (b.getString("sessiontype").trim().equalsIgnoreCase("Text")) {
                 tv_patientid.setText(getResources().getString(R.string.receiving_textchat_patientid) + " " + b.getInt("patientid", 0));
             }
 
             tv_accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    doctor_joined(b.getInt("patientid", 0), b.getInt("channelname"), b.getString("dateofcall"), b.getString("sessiontype"));
+                    if (InternetUtils.getInstance(CallingActivity.this).available()) {
+                        doctor_joined(b.getInt("patientid", 0), b.getInt("channelname"), b.getString("dateofcall"), b.getString("sessiontype"));
+                    } else {
+                        Toast.makeText(CallingActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
-        } else if (b != null && b.containsKey("doctorid") && b.containsKey("channelname") && b.containsKey("sessiontype")){
+        } else if (b != null && b.containsKey("doctorid") && b.containsKey("channelname") && b.containsKey("sessiontype")) {
 
-            if(b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
-                tv_patientid.setText(getResources().getString(R.string.receiving_videocall_doctorid) + " " + b.getInt("doctorid",0));
-            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Audio")){
-                tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_doctorid) + " " + b.getInt("doctorid",0));
-            }else if(b.getString("sessiontype").trim().equalsIgnoreCase("Text")){
-                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_doctorid) + " " + b.getInt("doctorid",0));
+            if (b.getString("sessiontype").trim().equalsIgnoreCase("Video")) {
+                tv_patientid.setText(getResources().getString(R.string.receiving_videocall_doctorid) + " " + b.getInt("doctorid", 0));
+            } else if (b.getString("sessiontype").trim().equalsIgnoreCase("Audio")) {
+                tv_patientid.setText(getResources().getString(R.string.receiving_audiocall_doctorid) + " " + b.getInt("doctorid", 0));
+            } else if (b.getString("sessiontype").trim().equalsIgnoreCase("Text")) {
+                tv_patientid.setText(getResources().getString(R.string.receiving_textchat_doctorid) + " " + b.getInt("doctorid", 0));
             }
 
             tv_accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    patient_joined(b.getInt("doctorid", 0), b.getInt("channelname", 0), b.getString("dateofcall"), b.getString("sessiontype"));
+                    if (InternetUtils.getInstance(CallingActivity.this).available()) {
+                        patient_joined(b.getInt("doctorid", 0), b.getInt("channelname", 0), b.getString("dateofcall"), b.getString("sessiontype"));
+                    } else {
+                        Toast.makeText(CallingActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
-        }else{
+        } else {
             Toast.makeText(CallingActivity.this, "Please try in sometime", Toast.LENGTH_SHORT).show();
         }
 
@@ -126,18 +137,18 @@ public class CallingActivity extends AppCompatActivity {
 
                                 //if(value.equalsIgnoreCase(2)){
 
-                                if(sessiontype.trim().equalsIgnoreCase("Video")){
+                                if (sessiontype.trim().equalsIgnoreCase("Video")) {
                                     Intent i = new Intent(CallingActivity.this, MainActivity.class);
                                     i.putExtra("channelname", channelname);
                                     //i.putExtra("type", "Host");
                                     startActivity(i);
                                     finish();
-                                }else if(sessiontype.trim().equalsIgnoreCase("Audio")){
+                                } else if (sessiontype.trim().equalsIgnoreCase("Audio")) {
                                     Intent i = new Intent(CallingActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                                     i.putExtra("channelname", channelname);
                                     startActivity(i);
                                     finish();
-                                }else if(sessiontype.trim().equalsIgnoreCase("Text")) {
+                                } else if (sessiontype.trim().equalsIgnoreCase("Text")) {
                                     doLogin(patient_id, preferences.getInt("id", 0));
                                 }
                             }
@@ -176,17 +187,17 @@ public class CallingActivity extends AppCompatActivity {
                                 //status 2 for call accepted, 3 for call rejected
 
                                 //if(value.equalsIgnoreCase(2)){
-                                if(sessiontype.trim().equalsIgnoreCase("Video")){
+                                if (sessiontype.trim().equalsIgnoreCase("Video")) {
                                     Intent i = new Intent(CallingActivity.this, MainActivity.class);
                                     i.putExtra("channelname", channelname);
                                     startActivity(i);
                                     finish();
-                                }else if(sessiontype.trim().equalsIgnoreCase("Audio")){
+                                } else if (sessiontype.trim().equalsIgnoreCase("Audio")) {
                                     Intent i = new Intent(CallingActivity.this, densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity.class);
                                     i.putExtra("channelname", channelname);
                                     startActivity(i);
                                     finish();
-                                }else if(sessiontype.trim().equalsIgnoreCase("Text")){
+                                } else if (sessiontype.trim().equalsIgnoreCase("Text")) {
                                     doLogin(doctorid, preferences.getInt("id", 0));
                                 }
                             }
@@ -208,46 +219,56 @@ public class CallingActivity extends AppCompatActivity {
     }
 
     private void doLogin(final int friendname, final int accountname) {
-        ChatManager mChatManager = AgoraApplication.the().getChatManager();
-        RtmClient mRtmClient = mChatManager.getRtmClient();
-        mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
-            @Override
-            public void onSuccess(Void responseInfo) {
-                Log.i("patient view", "login success");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(CallingActivity.this, SelectionActivity.class);
-                        intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
-                        Log.d("muser id ", accountname + " live activity" );
-                        intent.putExtra("friendname", friendname);
-                        intent.putExtra("accountname", accountname);
-                        intent.putExtra("istext", true);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-            }
+        final Loader loader = new Loader(CallingActivity.this);
+        if (InternetUtils.getInstance(CallingActivity.this).available()) {
+            ChatManager mChatManager = AgoraApplication.the().getChatManager();
+            RtmClient mRtmClient = mChatManager.getRtmClient();
+            mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
+                @Override
+                public void onSuccess(Void responseInfo) {
+                    Log.i("patient view", "login success");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
 
-            @Override
-            public void onFailure(final ErrorInfo errorInfo) {
-                Log.i("patient view ", "login failed: " + errorInfo.getErrorCode());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(errorInfo.getErrorCode() ==8){
+                            loader.dismissLoader();
                             Intent intent = new Intent(CallingActivity.this, SelectionActivity.class);
                             intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
-                            Log.d("muser id ", accountname + " live activity" );
+                            Log.d("muser id ", accountname + " live activity");
                             intent.putExtra("friendname", friendname);
                             intent.putExtra("accountname", accountname);
                             intent.putExtra("istext", true);
                             startActivity(intent);
+                            finish();
                         }
+                    });
+                }
 
-                    }
-                });
-            }
-        });
+                @Override
+                public void onFailure(final ErrorInfo errorInfo) {
+                    Log.i("patient view ", "login failed: " + errorInfo.getErrorCode());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (errorInfo.getErrorCode() == 8) {
+                                loader.dismissLoader();
+                                Intent intent = new Intent(CallingActivity.this, SelectionActivity.class);
+                                intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, String.valueOf(accountname));
+                                Log.d("muser id ", accountname + " live activity");
+                                intent.putExtra("friendname", friendname);
+                                intent.putExtra("accountname", accountname);
+                                intent.putExtra("istext", true);
+                                startActivity(intent);
+                            }
+
+                        }
+                    });
+                }
+            });
+        } else {
+            loader.dismissLoader();
+            Toast.makeText(CallingActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

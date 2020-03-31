@@ -4,6 +4,7 @@ package densoftinfotechio;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,6 +23,8 @@ import densoftinfotechio.adapter.EventsViewAdapter;
 import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.classes.Constants;
 import densoftinfotechio.model.EventsModel;
+import densoftinfotechio.utilities.InternetUtils;
+import densoftinfotechio.utilities.Loader;
 
 public class EventsViewActivity extends AppCompatActivity {
 
@@ -32,7 +35,7 @@ public class EventsViewActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private ArrayList<EventsModel> eventsModels = new ArrayList<>();
     private SharedPreferences preferences;
-
+    final Loader loader = new Loader(EventsViewActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,8 @@ public class EventsViewActivity extends AppCompatActivity {
 
         databaseReference = FirebaseDatabase.getInstance().getReference(Constants.firebasedatabasename);
         preferences = PreferenceManager.getDefaultSharedPreferences(EventsViewActivity.this);
+
+        loader.startLoader();
 
         /*if(preferences.contains("logindoctor")){
             linearlayout_checkbox.setVisibility(View.VISIBLE);
@@ -61,62 +66,72 @@ public class EventsViewActivity extends AppCompatActivity {
     }
 
     private void get_events() {
-        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                eventsModels.clear();
-                if(dataSnapshot.exists()){
-                    for(final DataSnapshot events: dataSnapshot.getChildren()){
-                        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(events.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if(dataSnapshot.exists()){
 
-                                    for(DataSnapshot eventstime: dataSnapshot.getChildren()) {
-                                        databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(events.getKey())
-                                                .child(eventstime.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        if(InternetUtils.getInstance(EventsViewActivity.this).available()){
+            databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    eventsModels.clear();
+                    if(dataSnapshot.exists()){
+                        for(final DataSnapshot events: dataSnapshot.getChildren()){
+                            databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(events.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if(dataSnapshot.exists()){
 
-                                                if(dataSnapshot.exists()){
-                                                    EventsModel eventsModel = dataSnapshot.getValue(EventsModel.class);
-                                                    if (eventsModel != null) {
-                                                        eventsModels.add(eventsModel);
-                                                        Log.d("events out of for ", eventsModel.toString());
+                                        for(DataSnapshot eventstime: dataSnapshot.getChildren()) {
+                                            databaseReference.child("Events").child(String.valueOf(preferences.getInt("id", 0))).child(events.getKey())
+                                                    .child(eventstime.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                                    if(dataSnapshot.exists()){
+                                                        EventsModel eventsModel = dataSnapshot.getValue(EventsModel.class);
+                                                        if (eventsModel != null) {
+                                                            eventsModels.add(eventsModel);
+                                                            Log.d("events out of for ", eventsModel.toString());
+                                                        }
                                                     }
+                                                    Log.d("events out of for ", eventsModels.toString());
+                                                    eventsViewAdapter.notifyDataSetChanged();
+
+                                                    loader.dismissLoader();
+
                                                 }
-                                                Log.d("events out of for ", eventsModels.toString());
-                                                eventsViewAdapter.notifyDataSetChanged();
 
-                                            }
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                }
+                                            });
 
-                                            }
-                                        });
+                                        }
 
+                                    }else{
+                                        loader.dismissLoader();
                                     }
+
+
 
                                 }
 
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }else{
+            loader.dismissLoader();
+            Toast.makeText(EventsViewActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -37,6 +37,8 @@ import densoftinfotechio.adapter.AppointmentAdapter;
 import densoftinfotechio.classes.Constants;
 import densoftinfotechio.model.DoctorScheduleModel;
 import densoftinfotechio.agora.openlive.R;
+import densoftinfotechio.utilities.InternetUtils;
+import densoftinfotechio.utilities.Loader;
 
 public class AppointmentsActivity extends AppCompatActivity {
 
@@ -57,6 +59,7 @@ public class AppointmentsActivity extends AppCompatActivity {
     ArrayList<DoctorScheduleModel> doctorScheduleModels_evening = new ArrayList<>();
     SharedPreferences preferences;
     int day_cal = 0, month_cal = 0, year_cal = 0;
+    final Loader loader = new Loader(AppointmentsActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +80,7 @@ public class AppointmentsActivity extends AppCompatActivity {
         tv_date = findViewById(R.id.tv_date);
 
         databaseReference = FirebaseDatabase.getInstance().getReference(Constants.firebasedatabasename);
+
 
         layoutManager = new GridLayoutManager(AppointmentsActivity.this, 5);
         layoutManager1 = new GridLayoutManager(AppointmentsActivity.this, 5);
@@ -196,69 +200,54 @@ public class AppointmentsActivity extends AppCompatActivity {
 
     private void addtofirebase() {
 
-        databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString()).child(et_patient_id.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                HashMap<String, Object> object = new HashMap<>();
-                object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
-                object.put("Day", day);
-                object.put("Date", tv_date.getText().toString());
-                object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
-                object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
-                object.put("SessionTime", time);
-                object.put("SessionType", text);
-                object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
-                object.put("InitiateCall", 0);
-                object.put("Talktime", 15);
 
-                if (!dataSnapshot.exists()) {
+        loader.startLoader();
+
+        if (InternetUtils.getInstance(AppointmentsActivity.this).available()) {
+            databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString()).child(et_patient_id.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    HashMap<String, Object> object = new HashMap<>();
+                    object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
+                    object.put("Day", day);
+                    object.put("Date", tv_date.getText().toString());
+                    object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
+                    object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
+                    object.put("SessionTime", time);
+                    object.put("SessionType", text);
+                    object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
+                    object.put("InitiateCall", 0);
+                    object.put("Talktime", 15);
+
+                    //if (!dataSnapshot.exists()) {
                     databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString())
                             .child(et_patient_id.getText().toString()).setValue(object);
-                } else {
 
-                    databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString())
-                            .child(et_patient_id.getText().toString()).updateChildren(object);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        databaseReference.child("PatientList").child(et_patient_id.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                HashMap<String, Object> object = new HashMap<>();
-                object.put("AppointmentId", Integer.parseInt(et_patient_id.getText().toString()));
-                object.put("Day", day);
-                object.put("Date", tv_date.getText().toString());
-                object.put("PatientId", Integer.parseInt(et_patient_id.getText().toString()));
-                object.put("SessionTime", time);
-                object.put("SessionType", text);
-                object.put("DoctorId", Integer.parseInt(et_doctor_id.getText().toString()));
-                object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
-                object.put("InitiateCall", 0);
-                object.put("Talktime", 15);
-
-                //FirebaseAppointmentModel firebaseAppointmentModel = new FirebaseAppointmentModel(text, time, et_patient_id.getText().toString(), getDay(et_day.getText().toString() + "-" + et_month.getText().toString() + "-" + et_year.getText().toString()));
-                if (!dataSnapshot.exists()) {
                     databaseReference.child("PatientList").child(et_patient_id.getText().toString())
                             .child(tv_date.getText().toString()).child(et_doctor_id.getText().toString()).setValue(object);
-                } else {
-                    databaseReference.child("PatientList").child(et_patient_id.getText().toString())
-                            .child(tv_date.getText().toString()).child(et_doctor_id.getText().toString()).updateChildren(object);
+                    /*} else {
+
+                        databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString())
+                                .child(et_patient_id.getText().toString()).updateChildren(object);
+
+                        databaseReference.child("PatientList").child(et_patient_id.getText().toString())
+                                .child(tv_date.getText().toString()).child(et_doctor_id.getText().toString()).updateChildren(object);
+                    }*/
+
+                    loader.dismissLoader();
+                    Toast.makeText(AppointmentsActivity.this, "Booked " + text, Toast.LENGTH_SHORT).show();
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
 
-        Toast.makeText(AppointmentsActivity.this, "Booked " + text, Toast.LENGTH_SHORT).show();
+        } else {
+            loader.dismissLoader();
+            Toast.makeText(AppointmentsActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public String getDay(String date) {
@@ -310,51 +299,60 @@ public class AppointmentsActivity extends AppCompatActivity {
     private void find_available_slots() {
         //doctorScheduleModels.clear();
 
+        loader.startLoader();
+
         doctorScheduleModels_morning.clear();
         doctorScheduleModels_afternoon.clear();
         doctorScheduleModels_evening.clear();
         day = getDay(tv_date.getText().toString());
 
-        databaseReference.child("Doctor-Schedule").child(et_doctor_id.getText().toString()).child(day).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        if(InternetUtils.getInstance(AppointmentsActivity.this).available()){
+            databaseReference.child("Doctor-Schedule").child(et_doctor_id.getText().toString()).child(day).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
 
-                if (dataSnapshot.getValue(DoctorScheduleModel.class) != null) {
-                    //doctorScheduleModels.add(dataSnapshot.getValue(DoctorScheduleModel.class));
+                    if (dataSnapshot.getValue(DoctorScheduleModel.class) != null) {
+                        //doctorScheduleModels.add(dataSnapshot.getValue(DoctorScheduleModel.class));
 
-                    for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",").length; i++) {
-                        Log.d("val ", dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i]);
-                        doctorScheduleModels_morning.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i], 1));
+                        for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",").length; i++) {
+                            Log.d("val ", dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i]);
+                            doctorScheduleModels_morning.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getMorningShift().split(",")[i], 1));
+                        }
+
+                        for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getAfternoonShift().split(",").length; i++) {
+                            doctorScheduleModels_afternoon.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getAfternoonShift().split(",")[i], 2));
+                        }
+
+                        for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getEveningShift().split(",").length; i++) {
+                            doctorScheduleModels_evening.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getEveningShift().split(",")[i], 3));
+                        }
+
+                        //if (doctorScheduleModels != null) {
+                        appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_morning, 1);
+                        recyclerview_morningsessions.setAdapter(appointmentAdapter);
+                        appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_afternoon, 2);
+                        recyclerview_afternoonsessions.setAdapter(appointmentAdapter);
+                        appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_evening, 3);
+                        recyclerview_eveningsessions.setAdapter(appointmentAdapter);
+
+                        loader.dismissLoader();
+                        //}
+
+
                     }
-
-                    for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getAfternoonShift().split(",").length; i++) {
-                        doctorScheduleModels_afternoon.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getAfternoonShift().split(",")[i], 2));
-                    }
-
-                    for (int i = 0; i < dataSnapshot.getValue(DoctorScheduleModel.class).getEveningShift().split(",").length; i++) {
-                        doctorScheduleModels_evening.add(new DoctorScheduleModel(dataSnapshot.getValue(DoctorScheduleModel.class).getEveningShift().split(",")[i], 3));
-                    }
-
-                    //if (doctorScheduleModels != null) {
-                    appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_morning, 1);
-                    recyclerview_morningsessions.setAdapter(appointmentAdapter);
-                    appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_afternoon, 2);
-                    recyclerview_afternoonsessions.setAdapter(appointmentAdapter);
-                    appointmentAdapter = new AppointmentAdapter(AppointmentsActivity.this, doctorScheduleModels_evening, 3);
-                    recyclerview_eveningsessions.setAdapter(appointmentAdapter);
-                    //}
 
 
                 }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                }
+            });
+        }else{
+            loader.dismissLoader();
+            Toast.makeText(AppointmentsActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+        }
     }
 }

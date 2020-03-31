@@ -1,4 +1,4 @@
-package densoftinfotechio;
+package densoftinfotechio.utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +30,8 @@ import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.classes.Constants;
 import densoftinfotechio.model.EventsModel;
 import densoftinfotechio.model.PatientRequestsModel;
+import densoftinfotechio.utilities.InternetUtils;
+import densoftinfotechio.utilities.Loader;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 
 public class WaitingActivity extends AppCompatActivity {
@@ -59,11 +62,15 @@ public class WaitingActivity extends AppCompatActivity {
 
         if (b != null && b.containsKey("channelname") && b.containsKey("type") && preferences != null && preferences.contains("id")) {
 
-            databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
-                    .child(sdf.format(Calendar.getInstance().getTime())).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    //if (dataSnapshot.exists()) {
+            final Loader loader = new Loader(WaitingActivity.this);
+            loader.startLoader();
+
+            if(InternetUtils.getInstance(WaitingActivity.this).available()){
+                databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
+                        .child(sdf.format(Calendar.getInstance().getTime())).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        //if (dataSnapshot.exists()) {
                         for (DataSnapshot children : dataSnapshot.getChildren()) {
                             databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
                                     .child(sdf.format(Calendar.getInstance().getTime())).child(children.getKey()).addValueEventListener(new ValueEventListener() {
@@ -92,14 +99,20 @@ public class WaitingActivity extends AppCompatActivity {
                                 }
                             });
                         }
-                    //}
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                        loader.dismissLoader();
+                        //}
+                    }
 
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }else{
+                loader.dismissLoader();
+                Toast.makeText(WaitingActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
