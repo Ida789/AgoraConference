@@ -44,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //updated
+        //updated new
         et_id = findViewById(R.id.et_id);
         tv_login = findViewById(R.id.tv_login);
 
