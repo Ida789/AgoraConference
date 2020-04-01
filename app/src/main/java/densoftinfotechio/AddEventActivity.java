@@ -63,11 +63,22 @@ public class AddEventActivity extends AppCompatActivity {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(AddEventActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        if ((month + 1) < 10) {
-                            et_event_date.setText(day + "-0" + (month + 1) + "-" + year);
-                        } else {
-                            et_event_date.setText(day + "-" + (month + 1) + "-" + year);
+
+                        if((day<10)){
+                            if ((month + 1) < 10) {
+                                et_event_date.setText("0" +day + "-0" + (month + 1) + "-" + year);
+                            } else {
+                                et_event_date.setText(day + "-" + (month + 1) + "-" + year);
+                            }
+                        }else{
+                            if ((month + 1) < 10) {
+                                et_event_date.setText(day + "-0" + (month + 1) + "-" + year);
+                            } else {
+                                et_event_date.setText(day + "-" + (month + 1) + "-" + year);
+                            }
                         }
+
+
 
                     }
                 }, year_cal, month_cal, day_cal);

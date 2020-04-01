@@ -1,7 +1,5 @@
 package densoftinfotechio.videocall.openlive.rtc;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 import io.agora.rtc.IRtcEngineEventHandler;
@@ -21,8 +19,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
         for (EventHandler handler : mHandler) {
             handler.onJoinChannelSuccess(channel, uid, elapsed);
-            //Log.d("stats for user ", " onLocalVideoStats " + channel + " uid " + uid);
-
         }
     }
 
@@ -30,7 +26,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onLeaveChannel(RtcStats stats) {
         for (EventHandler handler : mHandler) {
             handler.onLeaveChannel(stats);
-            //Log.d("stats for user ", " leave channel " + stats);
         }
     }
 
@@ -45,7 +40,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onUserJoined(int uid, int elapsed) {
         for (EventHandler handler : mHandler) {
             handler.onUserJoined(uid, elapsed);
-            //Log.d("stats for user ", " onUserJoined " + uid);
         }
     }
 
@@ -53,7 +47,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onUserOffline(int uid, int reason) {
         for (EventHandler handler : mHandler) {
             handler.onUserOffline(uid, reason);
-            //Log.d("stats for user ", " onLocalVideoStats " + reason);
         }
     }
 
@@ -61,7 +54,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onLocalVideoStats(IRtcEngineEventHandler.LocalVideoStats stats) {
         for (EventHandler handler : mHandler) {
             handler.onLocalVideoStats(stats);
-            //Log.d("stats for user ", " onLocalVideoStats " + stats);
         }
     }
 
@@ -69,7 +61,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onRtcStats(IRtcEngineEventHandler.RtcStats stats) {
         for (EventHandler handler : mHandler) {
             handler.onRtcStats(stats);
-            //Log.d("stats for user ", " onRtcStats " + stats);
         }
     }
 
@@ -84,7 +75,6 @@ public class AgoraEventHandler extends IRtcEngineEventHandler {
     public void onRemoteVideoStats(IRtcEngineEventHandler.RemoteVideoStats stats) {
         for (EventHandler handler : mHandler) {
             handler.onRemoteVideoStats(stats);
-            //Log.d("stats for user ", " onRemoteVideoStats channel " + stats);
         }
     }
 

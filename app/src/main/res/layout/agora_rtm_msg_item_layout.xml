@@ -43,8 +43,18 @@
             android:textColor="@color/black"
             android:background="@drawable/bubble_l"
             android:layout_below="@+id/item_name_l"
+            android:layout_centerVertical="true"/>
+
+        <!--<ProgressBar
+            android:id="@+id/progl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="15sp"
             android:layout_centerVertical="true"
-            android:visibility="gone"/>
+            android:visibility="gone"/>-->
 
     </RelativeLayout>
 
@@ -106,6 +116,17 @@
             android:textColor="@color/white"
             android:visibility="gone"
             android:layout_alignParentRight="true"/>
+
+        <!--<ProgressBar
+            android:id="@+id/progr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_centerVertical="true"
+            android:visibility="gone"/>-->
 
     </RelativeLayout>
 

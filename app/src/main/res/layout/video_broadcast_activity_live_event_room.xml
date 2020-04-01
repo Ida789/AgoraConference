@@ -41,8 +41,7 @@
                         android:src="@drawable/btn_leave"
                         android:scaleType="centerCrop"
                         android:background="@drawable/rounded_bg_half_transparent"
-                        android:onClick="onLeaveClicked"
-                        android:visibility="gone"/>
+                        android:onClick="onLeaveClicked" />
 
                     <RelativeLayout
                         android:id="@+id/live_name_space_layout"
@@ -53,8 +52,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_marginLeft="@dimen/live_top_layout_margin"
                         android:layout_marginStart="@dimen/live_top_layout_margin"
-                        android:background="@drawable/live_name_board_bg"
-                        android:visibility="gone">
+                        android:background="@drawable/live_name_board_bg">
 
                         <ImageView
                             android:id="@+id/live_name_board_icon"

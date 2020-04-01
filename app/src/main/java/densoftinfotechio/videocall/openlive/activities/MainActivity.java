@@ -137,6 +137,7 @@ public class MainActivity extends BaseActivity {
         mTopicEdit = findViewById(R.id.topic_edit);
         Bundle b = getIntent().getExtras();
         if(b!=null && b.containsKey("channelname")) {
+            Log.d("channel name is ", String.valueOf(b.getInt("channelname", 0)));
             mTopicEdit.setText(String.valueOf(b.getInt("channelname", 0)));
             checkPermission();
         }else{
@@ -255,6 +256,7 @@ public class MainActivity extends BaseActivity {
             config().setChannelName(room);
             intent.putExtra("channelname", b.getInt("channelname", 0));//channelname and type for DeepLink flow
             intent.putExtra("type", b.getString("type"));
+            Log.d("role from role acti ", " " + b.getString("type"));
             startActivity(intent);
             finish();
         }else if(b!=null && b.containsKey("channelname")){

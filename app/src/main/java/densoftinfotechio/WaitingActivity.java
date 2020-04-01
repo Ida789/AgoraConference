@@ -3,7 +3,6 @@ package densoftinfotechio;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -65,7 +64,9 @@ public class WaitingActivity extends AppCompatActivity {
             final Loader loader = new Loader(WaitingActivity.this);
             loader.startLoader();
 
-            if(InternetUtils.getInstance(WaitingActivity.this).available()){
+            if (InternetUtils.getInstance(WaitingActivity.this).available()) {
+                /*Intent i = new Intent(WaitingActivity.this, MainActivityv1.class);
+                startActivity(i);*/
                 databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
                         .child(sdf.format(Calendar.getInstance().getTime())).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -78,13 +79,13 @@ public class WaitingActivity extends AppCompatActivity {
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     EventsModel eventsModel = dataSnapshot.getValue(EventsModel.class);
 
-                                    if(eventsModel!=null){
+                                    if (eventsModel != null) {
                                         densoftinfotechio.videocall.openlive.Constants.event_time = eventsModel.getFromTime();
 
-                                        if(checktimewithinrange(eventsModel.getEventDate(), eventsModel.getFromTime(), eventsModel.getTotalTime())){
-                                            if(checktime(eventsModel.getEventDate(), eventsModel.getFromTime(), eventsModel.getTotalTime())){
+                                        if (checktimewithinrange(eventsModel.getEventDate(), eventsModel.getFromTime(), eventsModel.getTotalTime())) {
+                                            if (checktime(eventsModel.getEventDate(), eventsModel.getFromTime(), eventsModel.getTotalTime())) {
                                                 gotofirebase(eventsModel.getEventDate(), eventsModel.getFromTime());
-                                            }else{
+                                            } else {
                                                 tv_loading.setText("Sorry this event has ended ");
                                                 tv_join.setVisibility(View.GONE);
                                             }
@@ -109,7 +110,7 @@ public class WaitingActivity extends AppCompatActivity {
 
                     }
                 });
-            }else{
+            } else {
                 loader.dismissLoader();
                 Toast.makeText(WaitingActivity.this, "Please check Internet", Toast.LENGTH_SHORT).show();
             }
@@ -124,40 +125,40 @@ public class WaitingActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 //update start event in firebase to start an event
-                startEvent.put("StartEvent", 1);
+                /*startEvent.put("StartEvent", 1);
                 databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(eventdate)
                         .child(eventtime).child(b.getString("type", "Audience"))
                         .child(String.valueOf(preferences.getInt("id", 0))).updateChildren(startEvent);
                 databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0))).child(eventdate)
                         .child(eventtime).child(b.getString("type", "Co-Host"))
-                        .child(String.valueOf(preferences.getInt("id", 0))).updateChildren(startEvent);
+                        .child(String.valueOf(preferences.getInt("id", 0))).updateChildren(startEvent);*/
 
 
                 if (!dataSnapshot.exists()/* && test_time.equalsIgnoreCase(sdftime.format(Calendar.getInstance().getTime()))*/) {
                     fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
                     tv_loading.startAnimation(fade_animation);
-                        HashMap<String, Object> param = new HashMap<>();
-                        param.put("EventId", preferences.getInt("id", 0));
-                        param.put("PatientId", preferences.getInt("id", 0));
-                        param.put("Status", 0);
-                        param.put("StartEvent", 0);
-                        param.put("Type", b.getString("type", "Audience"));
-                        databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
-                                .child(eventdate).child(eventtime)
-                                .child(b.getString("type", "Audience")).child(String.valueOf(preferences.getInt("id", 0))).setValue(param);
+                    HashMap<String, Object> param = new HashMap<>();
+                    param.put("EventId", preferences.getInt("id", 0));
+                    param.put("PatientId", preferences.getInt("id", 0));
+                    param.put("Status", 0);
+                    param.put("StartEvent", 1);
+                    param.put("Type", b.getString("type", "Audience"));
+                    databaseReference.child("Events").child(String.valueOf(b.getInt("doctor", 0)))
+                            .child(eventdate).child(eventtime)
+                            .child(b.getString("type", "Audience")).child(String.valueOf(preferences.getInt("id", 0))).setValue(param);
                 } else {
                     PatientRequestsModel requestsModel = dataSnapshot.getValue(PatientRequestsModel.class);
                     densoftinfotechio.videocall.openlive.Constants.channel = b.getInt("channelname", 0);
                     if (requestsModel != null) {
                         if (requestsModel.getStartEvent() == 1) {
                             if (requestsModel.getStatus() == 1) {
-                                if( requestsModel.getType().equalsIgnoreCase("Co-Host")){
+                                if (requestsModel.getType().equalsIgnoreCase("Co-Host")) {
                                     Intent i = new Intent(WaitingActivity.this, MainActivity.class);
                                     i.putExtra("channelname", b.getInt("channelname", 0));
                                     i.putExtra("type", "Co-Host");
                                     startActivity(i);
                                     finish();
-                                }else{
+                                } else {
                                     Intent i = new Intent(WaitingActivity.this, MainActivity.class);
                                     i.putExtra("channelname", b.getInt("channelname", 0));
                                     i.putExtra("type", "Audience");
@@ -165,14 +166,12 @@ public class WaitingActivity extends AppCompatActivity {
                                     finish();
                                 }
 
-                            }else{
-                                if ( requestsModel.getStatus() == 0) {
-                                    if(requestsModel.getType().equalsIgnoreCase("Co-Host")){
-                                        tv_loading.setText("Please Wait while the Admin accepts your request to Join...........");
-                                        fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
-                                        tv_loading.startAnimation(fade_animation);
-                                    }
-                                } else{
+                            } else {
+                                if (requestsModel.getType().equalsIgnoreCase("Co-Host")) {
+                                    tv_loading.setText("Please Wait while the Admin accepts your request to Join...........");
+                                    fade_animation = AnimationUtils.loadAnimation(WaitingActivity.this, R.anim.fade_animation);
+                                    tv_loading.startAnimation(fade_animation);
+                                } else {
                                     Intent i = new Intent(WaitingActivity.this, MainActivity.class);
                                     i.putExtra("channelname", b.getInt("channelname", 0));
                                     i.putExtra("type", "Audience");
@@ -251,13 +250,13 @@ public class WaitingActivity extends AppCompatActivity {
             Date d1 = sdftime.parse(getcurrenttime);
 
             Date d2 = sdftime.parse(eventdate + " " + eventtime);
-            d2.setMinutes(d2.getMinutes()+(int)totaltime);
+            d2.setMinutes(d2.getMinutes() + (int) totaltime);
             Calendar calendar2 = Calendar.getInstance();
             Log.d("time plus 5 is ", "\n current time " + d1.toString() + " \n event time " + d2.toString());
 
-            if(d2.compareTo(d1) < 0){
+            if (d2.compareTo(d1) < 0) {
                 return false;
-            }else{
+            } else {
                 return true;
             }
 
@@ -268,7 +267,7 @@ public class WaitingActivity extends AppCompatActivity {
         }
     }
 
-    private boolean checktimewithinrange(String eventdate, String eventtime, long totaltime){
+    private boolean checktimewithinrange(String eventdate, String eventtime, long totaltime) {
         try {
             Date time1 = sdftime.parse(eventdate + " " + eventtime);
             Calendar calendar1 = Calendar.getInstance();
@@ -276,7 +275,7 @@ public class WaitingActivity extends AppCompatActivity {
             //calendar1.add(Calendar.DATE, 1);
 
             Date time2 = time1;
-            time2.setMinutes(time2.getMinutes() + (int)totaltime);
+            time2.setMinutes(time2.getMinutes() + (int) totaltime);
             Calendar calendar2 = Calendar.getInstance();
             calendar2.setTime(time2);
             //calendar2.add(Calendar.DATE, 1);
@@ -290,7 +289,7 @@ public class WaitingActivity extends AppCompatActivity {
             if (x.after(calendar1.getTime()) && x.before(calendar2.getTime())) {
                 Log.d("value is ", true + "");
                 return true;
-            }else{
+            } else {
                 Log.d("value is ", false + "");
                 return false;
             }

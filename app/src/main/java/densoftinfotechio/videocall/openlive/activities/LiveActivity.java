@@ -42,6 +42,7 @@ public class LiveActivity extends RtcBaseActivity {
     private ImageView mMuteAudioBtn;
     private ImageView mMuteVideoBtn;
     private SharedPreferences sharedPreferences;
+    private ChatManager mChatManager;
 
     private VideoEncoderConfiguration.VideoDimensions mVideoDimension;
     TextView tv_time;
@@ -59,7 +60,7 @@ public class LiveActivity extends RtcBaseActivity {
         tv_time = findViewById(R.id.tv_time);
         initData();
 
-        ChatManager mChatManager = AgoraApplication.the().getChatManager();
+        mChatManager = AgoraApplication.the().getChatManager();
         mRtmClient = mChatManager.getRtmClient();
 
     }

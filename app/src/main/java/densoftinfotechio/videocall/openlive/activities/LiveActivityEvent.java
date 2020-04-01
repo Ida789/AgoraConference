@@ -88,6 +88,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
     private boolean mIsInChat = false;
     int test_channel = 1200;
     int role = 2; //by default audience
+    ImageView live_btn_switch_camera, live_btn_beautification, live_btn_more, live_btn_mute_audio, live_btn_mute_video;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,23 +97,31 @@ public class LiveActivityEvent extends RtcBaseActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.video_broadcast_activity_live_event_room);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LiveActivityEvent.this);
-        initUI();
         tv_time = findViewById(R.id.tv_time);
-        initData();
         recycler_view_requests = findViewById(R.id.recycler_view_requests);
-
         bottom_container = findViewById(R.id.bottom_container);
-        ImageView live_btn_switch_camera = findViewById(R.id.live_btn_switch_camera);
-        ImageView live_btn_beautification = findViewById(R.id.live_btn_beautification);
-        ImageView live_btn_more = findViewById(R.id.live_btn_more);
-        ImageView live_btn_mute_audio = findViewById(R.id.live_btn_mute_audio);
-        ImageView live_btn_mute_video = findViewById(R.id.live_btn_mute_video);
+        live_btn_switch_camera = findViewById(R.id.live_btn_switch_camera);
+        live_btn_beautification = findViewById(R.id.live_btn_beautification);
+        live_btn_more = findViewById(R.id.live_btn_more);
+        live_btn_mute_audio = findViewById(R.id.live_btn_mute_audio);
+        live_btn_mute_video = findViewById(R.id.live_btn_mute_video);
+
+        initUI();
+        initData();
+
+        mChatManager = AgoraApplication.the().getChatManager();
+        mRtmClient = mChatManager.getRtmClient();
 
         if(sharedPreferences!=null && sharedPreferences.contains("logindoctor")){
             recycler_view_requests.setVisibility(View.VISIBLE);
             bottom_container.setVisibility(View.VISIBLE);
 
-        }else{
+            layoutManager = new LinearLayoutManager(LiveActivityEvent.this);
+            recycler_view_requests.setLayoutManager(layoutManager);
+
+            get_co_hosts();
+
+        }/*else{
             if(role == 1){
                 bottom_container.setVisibility(View.VISIBLE);
                 //role == 1 broadcaster and role == 2 audience
@@ -123,18 +132,11 @@ public class LiveActivityEvent extends RtcBaseActivity {
                 live_btn_more.setVisibility(View.GONE);
                 live_btn_mute_audio.setVisibility(View.GONE);
                 live_btn_mute_video.setVisibility(View.GONE);
+
                 rtcEngine().muteLocalAudioStream(true);
                 live_btn_mute_audio.setActivated(false);
             }
-        }
-
-        layoutManager = new LinearLayoutManager(LiveActivityEvent.this);
-        recycler_view_requests.setLayoutManager(layoutManager);
-
-        ChatManager mChatManager = AgoraApplication.the().getChatManager();
-        mRtmClient = mChatManager.getRtmClient();
-
-        get_co_hosts();
+        }*/
     }
 
 
@@ -210,7 +212,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
 
         initUserIcon();
 
-        role = getIntent().getIntExtra(
+        int role = getIntent().getIntExtra(
                 densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE,
                 Constants.CLIENT_ROLE_AUDIENCE);
         boolean isBroadcaster =  (role == Constants.CLIENT_ROLE_BROADCASTER);
@@ -225,13 +227,11 @@ public class LiveActivityEvent extends RtcBaseActivity {
         beautyBtn.setActivated(true);
         rtcEngine().setBeautyEffectOptions(beautyBtn.isActivated(),
                 densoftinfotechio.videocall.openlive.Constants.DEFAULT_BEAUTY_OPTIONS);
-        rtcEngine().enableWebSdkInteroperability(true);
 
         mVideoGridContainer = findViewById(R.id.live_video_grid_layout);
         mVideoGridContainer.setStatsManager(statsManager());
 
         rtcEngine().setClientRole(role);
-        rtcEngine().enableVideo();
         if (isBroadcaster) startBroadcast();
     }
 
@@ -419,12 +419,18 @@ public class LiveActivityEvent extends RtcBaseActivity {
 
     public void onPushStreamClicked(View view) {
         // Do nothing at the moment
-        doLogin(sharedPreferences.getInt("id", 0));
+
+        try {
+            doLogin(sharedPreferences.getInt("id", 0));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void onMuteAudioClicked(View view) {
         if (!mMuteVideoBtn.isActivated()) return;
 
+        Log.d("status of event ", view.isActivated() + "");
         rtcEngine().muteLocalAudioStream(view.isActivated());
         view.setActivated(!view.isActivated());
     }
@@ -435,6 +441,7 @@ public class LiveActivityEvent extends RtcBaseActivity {
         } else {
             startBroadcast();
         }
+
         view.setActivated(!view.isActivated());
     }
 
@@ -469,9 +476,11 @@ public class LiveActivityEvent extends RtcBaseActivity {
     }
 
     private void doLogin(final int accountname) {
+        try{
+            mIsInChat = true;
 
-        mIsInChat = true;
 
+            Log.d("status of event ", accountname + "");
             mRtmClient.login(null, String.valueOf(accountname), new ResultCallback<Void>() {
                 @Override
                 public void onSuccess(Void responseInfo) {
@@ -510,11 +519,20 @@ public class LiveActivityEvent extends RtcBaseActivity {
                     });
                 }
             });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
 
     }
 
     private void doLogout() {
-        mRtmClient.logout(null);
-        MessageUtil.cleanMessageListBeanList();
+        try {
+            mRtmClient.logout(null);
+            MessageUtil.cleanMessageListBeanList();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

@@ -68,6 +68,7 @@ import densoftinfotechio.realtimemessaging.agora.model.MessageBean;
 import densoftinfotechio.realtimemessaging.agora.model.MessageListBean;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
+import densoftinfotechio.utilities.Loader;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
 import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
@@ -116,6 +117,9 @@ public class MessageActivity extends AppCompatActivity {
     FusedLocationProviderClient mFusedLocationClient;
     int PERMISSION_ID = 44;
     boolean isTextChat = false;
+    private Loader loader = new Loader(MessageActivity.this);
+    private int last_pos_to_Send = 0;
+    private int contentsize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,11 +198,11 @@ public class MessageActivity extends AppCompatActivity {
             mPeerId = targetName;
             mTitleTextView.setText(mPeerId);
 
-            /*// load history chat records
+            // load history chat records
             MessageListBean messageListBean = MessageUtil.getExistMessageListBean(mPeerId);
             if (messageListBean != null) {
                 mMessageBeanList.addAll(messageListBean.getMessageBeanList());
-            }*/
+            }
 
             // load offline messages since last chat with this peer.
             // Then clear cached offline messages from message pool
@@ -243,8 +247,11 @@ public class MessageActivity extends AppCompatActivity {
                 send_live_location(msg.concat("~location"));
             }else{
                 if (Constants.uris.size() > 0) {
+                    loader.startSender();
+                    contentsize = Constants.uris.size()-1;
                     recyclerview.setVisibility(View.VISIBLE);
                     for (int i = 0; i < Constants.uris.size(); i++) {
+                        last_pos_to_Send = i;
                         BackgroundUpload backgroundUpload = new BackgroundUpload();
                         backgroundUpload.execute(Constants.uris.get(i));
                     }
@@ -267,8 +274,11 @@ public class MessageActivity extends AppCompatActivity {
                 send_live_location(msg.concat("~location"));
             }else {
                 if (Constants.uris.size() > 0) {
+                    loader.startSender();
+                    contentsize = Constants.uris.size()-1;
                     recyclerview.setVisibility(View.VISIBLE);
                     for (int i = 0; i < Constants.uris.size(); i++) {
+                        last_pos_to_Send = i;
                         BackgroundUpload backgroundUpload = new BackgroundUpload();
                         backgroundUpload.execute(Constants.uris.get(i));
                     }
@@ -808,7 +818,7 @@ public class MessageActivity extends AppCompatActivity {
                         galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
                         recyclerview.setAdapter(galleryAdapter);
 
-                        Toast toast = Toast.makeText(this, "Your image has been selected", Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(this, "Your image has been selected", Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
 
@@ -833,7 +843,7 @@ public class MessageActivity extends AppCompatActivity {
                             galleryAdapter = new GalleryAdapter(getApplicationContext(), Constants.uris);
                             recyclerview.setAdapter(galleryAdapter);
 
-                            Toast toast = Toast.makeText(this, "Your images have been selected", Toast.LENGTH_LONG);
+                            Toast toast = Toast.makeText(this, "Your images have been selected", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER, 0, 0);
                             toast.show();
 
@@ -858,7 +868,7 @@ public class MessageActivity extends AppCompatActivity {
                     Log.d("video path ", vidPath);
                     Constants.uris.add(selectedVideoUri);
 
-                    Toast toast = Toast.makeText(this, "Your video has been selected", Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(this, "Your video has been selected", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                     //uploadDatatoFirestore(selectedVideoUri, "video");
@@ -943,6 +953,8 @@ public class MessageActivity extends AppCompatActivity {
 
                                     }
 
+                                    dismissloader();
+
                                 }
                             });
 
@@ -954,8 +966,21 @@ public class MessageActivity extends AppCompatActivity {
                         public void onFailure(@NonNull Exception e) {
                             Log.d("failed ", "uploading on server ");
                             //Toast.makeText(MessageActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            dismissloader();
                         }
                     });
+        }
+    }
+
+    private void dismissloader() {
+        try{
+            Log.d("size to check ",last_pos_to_Send +"    " + contentsize);
+            if(last_pos_to_Send==contentsize){
+                loader.dismissLoader();
+            }
+        }catch (Exception e){
+            loader.dismissLoader();
+            e.printStackTrace();
         }
     }
 

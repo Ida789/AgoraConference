@@ -2,7 +2,6 @@ package densoftinfotechio;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,23 +23,20 @@ import java.util.HashMap;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import densoftinfotechio.adapter.PatientViewAdapter;
+import densoftinfotechio.agora.openlive.R;
 import densoftinfotechio.backgroundservices.BackgroundServiceNotification;
-import densoftinfotechio.model.PatientModel;
+import densoftinfotechio.model.DoctorModel;
 import densoftinfotechio.realtimemessaging.agora.activity.SelectionActivity;
 import densoftinfotechio.realtimemessaging.agora.rtmtutorial.ChatManager;
 import densoftinfotechio.realtimemessaging.agora.utils.MessageUtil;
 import densoftinfotechio.utilities.InternetUtils;
 import densoftinfotechio.utilities.Loader;
 import densoftinfotechio.videocall.openlive.Constants;
-import densoftinfotechio.videocall.openlive.activities.LiveActivity;
 import densoftinfotechio.videocall.openlive.activities.MainActivity;
-import densoftinfotechio.model.DoctorModel;
-import densoftinfotechio.agora.openlive.R;
 import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
 import io.agora.rtm.RtmClient;

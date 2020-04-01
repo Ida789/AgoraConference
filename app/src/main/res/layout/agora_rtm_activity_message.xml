@@ -74,7 +74,7 @@
         android:id="@+id/message_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/message_edittiext"
+        android:layout_above="@+id/selection_chat_btn"
         android:layout_below="@+id/message_title" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

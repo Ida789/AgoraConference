@@ -112,12 +112,12 @@
             android:parentActivityName="densoftinfotechio.audiocall.openlive.voice.only.ui.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" /> <!-- Screen Sharing Activities -->
-        <activity
+        <!--<activity
             android:name="densoftinfotechio.screenshare.app.BroadcasterActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="sensor" />
         <activity android:name="densoftinfotechio.screenshare.app.MainActivity" />
-        <activity android:name="densoftinfotechio.screenshare.app.AudienceActivity" /> <!-- RealTime Messaging Activities -->
+        <activity android:name="densoftinfotechio.screenshare.app.AudienceActivity" /> --><!-- RealTime Messaging Activities -->
         <activity
             android:name="densoftinfotechio.realtimemessaging.agora.activity.LoginActivity"
             android:screenOrientation="sensorPortrait" />
@@ -127,6 +127,8 @@
         <activity
             android:name="densoftinfotechio.realtimemessaging.agora.activity.MessageActivity"
             android:screenOrientation="portrait" />
+
+
     </application>
 
 </manifest>

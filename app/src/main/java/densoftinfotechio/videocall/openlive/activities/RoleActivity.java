@@ -50,11 +50,11 @@ public class RoleActivity extends BaseActivity {
     }
 
     public void onJoinAsBroadcaster(View view) {
-        gotoLiveActivity(Constants.CLIENT_ROLE_BROADCASTER);
+        //gotoLiveActivity(Constants.CLIENT_ROLE_BROADCASTER);
     }
 
     public void onJoinAsAudience(View view) {
-        gotoLiveActivity(Constants.CLIENT_ROLE_AUDIENCE);
+        //gotoLiveActivity(Constants.CLIENT_ROLE_AUDIENCE);
     }
 
     private void gotoLiveActivity(int role) {
@@ -69,6 +69,7 @@ public class RoleActivity extends BaseActivity {
     private void gotoLiveEventActivity(int role) {
         //deep link flow
         Intent intent = new Intent(getIntent());
+        Log.d("role from role acti ", " " + role);
         intent.putExtra(densoftinfotechio.videocall.openlive.Constants.KEY_CLIENT_ROLE, role);
         intent.setClass(getApplicationContext(), LiveActivityEvent.class);
         startActivity(intent);

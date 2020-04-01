@@ -217,7 +217,7 @@ public class AppointmentsActivity extends AppCompatActivity {
                     object.put("SessionType", text);
                     object.put("Channel", Integer.parseInt(et_doctor_id.getText().toString() + et_patient_id.getText().toString()));
                     object.put("InitiateCall", 0);
-                    object.put("Talktime", 15);
+                    object.put("Talktime", 30);
 
                     //if (!dataSnapshot.exists()) {
                     databaseReference.child("DoctorList").child(et_doctor_id.getText().toString()).child(tv_date.getText().toString())

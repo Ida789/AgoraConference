@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -209,7 +210,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 .into(holder.iv_image_r);
         holder.iv_image_r.setVisibility(View.VISIBLE);
         holder.textViewSelfMsg.setVisibility(View.GONE);
-
         holder.iv_image_r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -230,6 +230,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         private RelativeLayout layoutLeft;
         private RelativeLayout layoutRight;
         private ImageView iv_image_l, iv_image_r;
+        //private ProgressBar progl, progr;
 
         MyViewHolder(View itemView) {
             super(itemView);
@@ -244,6 +245,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             iv_image_r = itemView.findViewById(R.id.iv_image_r);
             tv_time_r = itemView.findViewById(R.id.tv_time_r);
             tv_time_l = itemView.findViewById(R.id.tv_time_l);
+            //progl = itemView.findViewById(R.id.progl);
+            //progr = itemView.findViewById(R.id.progr);
         }
     }
 

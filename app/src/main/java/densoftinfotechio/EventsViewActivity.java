@@ -121,6 +121,8 @@ public class EventsViewActivity extends AppCompatActivity {
                                 }
                             });
                         }
+                    }else{
+                        loader.dismissLoader();
                     }
                 }
 
